@@ -12,9 +12,18 @@
 #include <cr_section_macros.h>
 
 // TODO: insert other include files here
-#include "gpio_17xx_40xx.h"
 
 // TODO: insert other definitions and declarations here
+#define PULL_UP 00
+#define REPEATR 01
+#define NO_PULL 10
+#define PULL_DN 11
+
+#define FUNC0 00
+#define FUNC1 01
+#define FUNC2 10
+#define FUNC3 11
+
 void _delay_ms(uint16_t ms);
 
 int main(void) {
@@ -34,6 +43,10 @@ int main(void) {
     Chip_GPIO_SetPinDIROutput(LPC_GPIO, 1, 23);
 
     /* Init UART */
+    Chip_IOCON_PinMux(LPC_IOCON, 0, 10, NO_PULL, FUNC1); // IOCON P0.10 TXD2 (func1), no pull
+    Chip_IOCON_PinMux(LPC_IOCON, 0, 11, NO_PULL, FUNC1); // IOCON P0.11 RXD2 (func1), no pull
+    Chip_UART_Init(LPC_UART2);
+    Chip_UART_SetBaud(LPC_UART2, 115200);
 
 
     // Force the counter to be placed into memory
