@@ -10,7 +10,7 @@
 
 #include "chip.h"
 #include <cr_section_macros.h>
-#include "stdutils.h"
+//#include "stdutils.h"
 
 // TODO: insert other include files here
 
@@ -20,10 +20,10 @@
 #define NO_PULL 10
 #define PULL_DN 11
 
-#define FUNC0 00
-#define FUNC1 01
-#define FUNC2 10
-#define FUNC3 11
+//#define FUNC0 00
+//#define FUNC1 01
+//#define FUNC2 10
+//#define FUNC3 11
 
 void _delay_ms(uint16_t ms);
 
@@ -44,8 +44,8 @@ int main(void) {
     Chip_GPIO_SetPinDIROutput(LPC_GPIO, 1, 23);
 
     /* Init UART */
-    Chip_IOCON_PinMux(LPC_IOCON, 0, 10, NO_PULL, FUNC1); // IOCON P0.10 TXD2 (func1), no pull
-    Chip_IOCON_PinMux(LPC_IOCON, 0, 11, NO_PULL, FUNC1); // IOCON P0.11 RXD2 (func1), no pull
+    Chip_IOCON_PinMux(LPC_IOCON, 0, 10, IOCON_MODE_INACT, IOCON_FUNC1); // IOCON P0.10 TXD2 (func1), no pull
+    Chip_IOCON_PinMux(LPC_IOCON, 0, 11, IOCON_MODE_INACT, IOCON_FUNC1); // IOCON P0.11 RXD2 (func1), no pull
     Chip_UART_Init(LPC_UART2);
     Chip_UART_SetBaud(LPC_UART2, 115200);
 
