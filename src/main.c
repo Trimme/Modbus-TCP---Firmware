@@ -10,6 +10,7 @@
 
 #include "chip.h"
 #include <cr_section_macros.h>
+#include "stdutils.h"
 
 // TODO: insert other include files here
 #include "gpio_17xx_40xx.h"
