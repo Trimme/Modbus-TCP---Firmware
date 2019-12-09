@@ -9,6 +9,7 @@
 */
 
 #include "chip.h"
+#include "../ioLibrary_Driver/Ethernet/wizchip_conf.h"
 #include <cr_section_macros.h>
 #include <stdio.h>
 //#include "stdutils.h"
@@ -18,12 +19,6 @@
 /* SSP */
 #define BUFFER_SIZE (0x100)
 #define LPC_SSP LPC_SSP1
-#define LPC_GPDMA_SSP_TX GPDMA_CONN_SSP1_Tx
-#define LPC_GPDMA_SSP_RX GPDMA_CONN_SSP1_Rx
-
-static SSP_ConfigFormat ssp_format;
-static volatile uint8_t ssp_dma_txf_completed = 0;
-static volatile uint8_t ssp_dma_rxf_completed = 0;
 
 /* UART Selection */
 #define UART_SELECTION LPC_UART2
@@ -40,10 +35,26 @@ STATIC RINGBUFF_T txring, rxring;
 /* Tx/Rx buffers */
 static uint8_t rxbuff[UART_RRB_SIZE], txbuff[UART_SRB_SIZE];
 
+/* WizNet stuff */
+wiz_NetInfo gWIZNETINFO_CONF = { .mac = {0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC}, // MAC address
+				.ip = {192, 168, 0, 199}, // IP address
+				.sn = {255, 255, 255, 0}, // Subnet mask
+				.dns = {8, 8, 8, 8}, // DNS address
+				.gw = {192, 168, 0, 1}, // Gateway address
+				.dhcp = NETINFO_STATIC};
+
 /* Function declarations */
 void GPIO_Init(void);
 void UART_Init(void);
 void SSP_Init(void);
+void W5500_Init(void);
+
+static void Net_Conf(void);
+static void Display_Net_Conf(void);
+void wizchip_select(void);
+void wizchip_deselect();
+void wizchip_write(uint8_t wb);
+uint8_t wizchip_read(void);
 
 int _write(int iFileHandle, char *pcBuffer, int iLength);
 void _delay_ms(uint16_t ms);
@@ -53,22 +64,22 @@ int main(void) {
 
 	// Read clock settings and update SystemCoreClock variable
     SystemCoreClockUpdate();
-    // Init GPIO
     GPIO_Init();
-    // Init UART
     UART_Init();
-    printf("UART init done\r\n");
-    // Init SSP
     SSP_Init();
-	printf("SSP init done\r\n");
+    W5500_Init();
+    _delay_ms(3);
+    Net_Conf();
+    _delay_ms(3);
+    Display_Net_Conf();
 
-    _delay_ms(500);
-    printf("Sending SPI frame: [10101101]\r\n");
-    Chip_SSP_SendFrame(LPC_SSP, 0b10101101);
-    printf("Done.\r\n");
 
-    _delay_ms(1000);
-    printf("UART Deactivated, entering blinking mode...\r\n");
+    // TODO: Code here
+
+    printf("Done. \r\n");
+
+    _delay_ms(41248);
+    printf("\r\nUART Deactivated, entering blinking mode...\r\n");
     _delay_ms(500);
 
     NVIC_DisableIRQ(IRQ_SELECTION);
@@ -104,21 +115,51 @@ int main(void) {
     return 0;
 }
 
+void W5500_Init(void){
+
+	uint8_t tmp;
+	uint8_t memsize[2][8] = {{2, 2, 2, 2, 2, 2, 2, 2}, {2, 2, 2, 2, 2, 2, 2, 2}};
+
+	Chip_GPIO_SetPinState(LPC_GPIO, 0, 18, true); // SSEL
+
+	/*
+	Chip_GPIO_SetPinState(LPC_GPIO, 0, 22, true);
+	tmp = 0xFF;
+	while(tmp--);
+	Chip_GPIO_SetPinState(LPC_GPIO, 0, 22, false);
+	*/
+
+	reg_wizchip_cs_cbfunc(wizchip_select, wizchip_deselect);
+	reg_wizchip_spi_cbfunc(wizchip_read, wizchip_write);
+
+
+	/* wizchip initialization */
+	if(ctlwizchip(CW_INIT_WIZCHIP, (void*) memsize) == -1){
+		printf("WIZCHIP initialization failed.");
+	}
+
+}
+
 void SSP_Init(void){
 
 	/* Init Pins */
-	Chip_IOCON_PinMux(LPC_IOCON, 0, 6, IOCON_MODE_INACT, IOCON_FUNC2); // SSEL 1
-	Chip_IOCON_PinMux(LPC_IOCON, 0, 7, IOCON_MODE_INACT, IOCON_FUNC2); // SCLK1
+	Chip_IOCON_PinMux(LPC_IOCON, 0, 7, IOCON_MODE_INACT, IOCON_FUNC2); // SCK1
 	Chip_IOCON_PinMux(LPC_IOCON, 0, 8, IOCON_MODE_INACT, IOCON_FUNC2); // MISO1
 	Chip_IOCON_PinMux(LPC_IOCON, 0, 9, IOCON_MODE_INACT, IOCON_FUNC2); // MOSI1
 
+	Chip_IOCON_PinMux(LPC_IOCON, 0, 18, IOCON_MODE_PULLUP, IOCON_FUNC0);
+	Chip_GPIO_SetPinDIROutput(LPC_GPIO, 0, 18); // SSEL1
+
+	Chip_IOCON_PinMux(LPC_IOCON, 0, 1, IOCON_MODE_PULLUP, IOCON_FUNC0);
+	Chip_GPIO_SetPinDIROutput(LPC_GPIO, 0, 1); // N_RESET
+
 	/* SSP Init */
 	Chip_SSP_Init(LPC_SSP);
-	ssp_format.frameFormat = SSP_FRAMEFORMAT_SPI;
-	ssp_format.bits = SSP_BITS_8;
-	ssp_format.clockMode = SSP_CLOCK_MODE0;
-	Chip_SSP_SetFormat(LPC_SSP, ssp_format.bits, ssp_format.frameFormat, ssp_format.clockMode);
+	Chip_SSP_SetFormat(LPC_SSP, SSP_BITS_8, SSP_FRAMEFORMAT_SPI, SSP_CLOCK_MODE0);
+	Chip_SSP_SetMaster(LPC_SSP, true);
+	Chip_SSP_SetBitRate(LPC_SSP, 100000);
 	Chip_SSP_Enable(LPC_SSP);
+
 
 }
 
@@ -140,7 +181,7 @@ void UART_Init(void){
 
     /* UART Init */
     Chip_UART_Init(UART_SELECTION);
-    Chip_UART_SetBaud(UART_SELECTION, 115200);
+    Chip_UART_SetBaud(UART_SELECTION, 57600);
     Chip_UART_ConfigData(UART_SELECTION, (UART_LCR_WLEN8 | UART_LCR_SBS_1BIT));
     Chip_UART_SetupFIFOS(UART_SELECTION, (UART_FCR_FIFO_EN | UART_FCR_TRG_LEV2));
     Chip_UART_TXEnable(UART_SELECTION);
@@ -150,7 +191,7 @@ void UART_Init(void){
     RingBuffer_Init(&txring, txbuff, 1, UART_SRB_SIZE);
 
     /* Reset and enable FIFOs, FIFO trigger level 3 (14 chars) */
-    Chip_UART_SetupFIFOS(UART_SELECTION, (UART_FCR_FIFO_EN | UART_FCR_RX_RS | UART_FCR_TX_RS | UART_FCR_TRG_LEV3));
+    Chip_UART_SetupFIFOS(UART_SELECTION, (UART_FCR_FIFO_EN | UART_FCR_RX_RS | UART_FCR_TX_RS | UART_FCR_TRG_LEV1));
 
     /* Enable receive data and line status interrupt */
     Chip_UART_IntEnable(UART_SELECTION, (UART_IER_RBRINT | UART_IER_RLSINT));
@@ -161,6 +202,56 @@ void UART_Init(void){
 
 }
 
+static void Net_Conf(void){
+
+	/* wizchip netconf */
+	ctlnetwork(CN_SET_NETINFO, (void*) &gWIZNETINFO_CONF);
+
+}
+
+static void Display_Net_Conf(void){
+
+	uint8_t tmpstr[6] = {0,};
+	wiz_NetInfo gWIZNETINFO;
+
+	ctlnetwork(CN_GET_NETINFO, (void*) &gWIZNETINFO);
+
+	// Display Network Information
+	ctlwizchip(CW_GET_ID,(void*)tmpstr);
+
+	if(gWIZNETINFO.dhcp == NETINFO_DHCP) printf("\r\n===== %s NET CONF : DHCP =====\r\n",(char*)tmpstr);
+		else printf("\r\n===== %s NET CONF : Static =====\r\n",(char*)tmpstr);
+	printf(" MAC : %02X:%02X:%02X:%02X:%02X:%02X\r\n", gWIZNETINFO.mac[0], gWIZNETINFO.mac[1], gWIZNETINFO.mac[2], gWIZNETINFO.mac[3], gWIZNETINFO.mac[4], gWIZNETINFO.mac[5]);
+	printf(" IP : %d.%d.%d.%d\r\n", gWIZNETINFO.ip[0], gWIZNETINFO.ip[1], gWIZNETINFO.ip[2], gWIZNETINFO.ip[3]);
+	printf(" GW : %d.%d.%d.%d\r\n", gWIZNETINFO.gw[0], gWIZNETINFO.gw[1], gWIZNETINFO.gw[2], gWIZNETINFO.gw[3]);
+	printf(" SN : %d.%d.%d.%d\r\n", gWIZNETINFO.sn[0], gWIZNETINFO.sn[1], gWIZNETINFO.sn[2], gWIZNETINFO.sn[3]);
+	printf("===================================\r\n");
+}
+
+void wizchip_select(void){
+	Chip_GPIO_SetPinState(LPC_GPIO, 0, 18, false); // SSEL
+}
+
+void wizchip_deselect(){
+	Chip_GPIO_SetPinState(LPC_GPIO, 0, 18, true); // SSEL
+}
+
+void wizchip_write(uint8_t wb){
+
+	Chip_SSP_WriteFrames_Blocking(LPC_SSP, &wb, 1);
+
+}
+
+uint8_t wizchip_read(void){
+
+	uint8_t rb;
+
+	Chip_SSP_ReadFrames_Blocking(LPC_SSP, &rb, 1);
+
+	return rb;
+
+}
+
 void HANDLER_NAME(void){
 
 	Chip_UART_IRQRBHandler(UART_SELECTION, &rxring, &txring);
@@ -168,6 +259,8 @@ void HANDLER_NAME(void){
 }
 
 int _write(int iFileHandle, char *pcBuffer, int iLength){
+
+	_delay_ms(7);
 
 	int ret;
 
