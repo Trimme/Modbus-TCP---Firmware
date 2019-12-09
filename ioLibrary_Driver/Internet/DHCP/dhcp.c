@@ -50,7 +50,7 @@
 //
 //*****************************************************************************
 
-#include "socket.h"
+#include "../../Ethernet/socket.h"
 #include "dhcp.h"
 
 /* If you want to display debug & processing message, Define _DHCP_DEBUG_ in dhcp.h */
@@ -602,7 +602,7 @@ int8_t parseDHCPMSG(void)
    #endif   
    }
    else return 0;
-	if (svr_port == DHCP_SERVER_PORT) {
+   if (svr_port == DHCP_SERVER_PORT) {
       // compare mac address
 		if ( (pDHCPMSG->chaddr[0] != DHCP_CHADDR[0]) || (pDHCPMSG->chaddr[1] != DHCP_CHADDR[1]) ||
 		     (pDHCPMSG->chaddr[2] != DHCP_CHADDR[2]) || (pDHCPMSG->chaddr[3] != DHCP_CHADDR[3]) ||

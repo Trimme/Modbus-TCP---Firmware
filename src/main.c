@@ -10,6 +10,7 @@
 
 #include "chip.h"
 #include "../ioLibrary_Driver/Ethernet/wizchip_conf.h"
+#include "../ioLibrary_Driver/Ethernet/socket.h"
 #include <cr_section_macros.h>
 #include <stdio.h>
 //#include "stdutils.h"
@@ -35,12 +36,18 @@ STATIC RINGBUFF_T txring, rxring;
 /* Tx/Rx buffers */
 static uint8_t rxbuff[UART_RRB_SIZE], txbuff[UART_SRB_SIZE];
 
+/* __ */
+#define TICKRATE_HZ1 (1000)
+#define TICKRATE_HZ2 (1)
+volatile uint32_t msTicks;
+
 /* WizNet stuff */
-wiz_NetInfo gWIZNETINFO_CONF = { .mac = {0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC}, // MAC address
-				.ip = {192, 168, 0, 199}, // IP address
+
+wiz_NetInfo gWIZNETINFO = { .mac = {0x9b, 0x52, 0x9d, 0x41, 0xfc, 0x7c}, // MAC address
+				.ip = {192, 168, 1, 31}, // IP address
 				.sn = {255, 255, 255, 0}, // Subnet mask
-				.dns = {8, 8, 8, 8}, // DNS address
-				.gw = {192, 168, 0, 1}, // Gateway address
+				.dns = {0, 0, 0, 0}, // DNS address
+				.gw = {192, 168, 1, 1}, // Gateway address
 				.dhcp = NETINFO_STATIC};
 
 /* Function declarations */
@@ -52,7 +59,7 @@ void W5500_Init(void);
 static void Net_Conf(void);
 static void Display_Net_Conf(void);
 void wizchip_select(void);
-void wizchip_deselect();
+void wizchip_deselect(void);
 void wizchip_write(uint8_t wb);
 uint8_t wizchip_read(void);
 
@@ -64,32 +71,41 @@ int main(void) {
 
 	// Read clock settings and update SystemCoreClock variable
     SystemCoreClockUpdate();
+
+    // Initialize GPIO pins for LEDs
     GPIO_Init();
+
+    // Initialize UART
     UART_Init();
+
+    // Initialize SSP in SPI mode
     SSP_Init();
+
+    // Initialize W5500
     W5500_Init();
     _delay_ms(3);
+
+    // Configure net
     Net_Conf();
     _delay_ms(3);
+
+    // Display configuration
     Display_Net_Conf();
+    _delay_ms(3);
+
+    // Setup SysTick Timer
+    SysTick_Config(SystemCoreClock / TICKRATE_HZ1);
 
 
     // TODO: Code here
-
-    printf("Done. \r\n");
-
-    _delay_ms(41248);
-    printf("\r\nUART Deactivated, entering blinking mode...\r\n");
-    _delay_ms(500);
-
-    NVIC_DisableIRQ(IRQ_SELECTION);
-    Chip_UART_DeInit(UART_SELECTION);
 
     // Force the counter to be placed into memory
     volatile static int i = 0 ;
     // Enter an infinite loop, just incrementing a counter
     while(1) {
 
+
+    	/*
     	Chip_GPIO_SetPinState(LPC_GPIO, 1, 18, true);
     	Chip_GPIO_SetPinState(LPC_GPIO, 1, 23, false);
 
@@ -109,6 +125,7 @@ int main(void) {
     	Chip_GPIO_SetPinState(LPC_GPIO, 1, 21, false);
 
     	_delay_ms(250);
+		*/
 
         i++ ;
     }
@@ -117,7 +134,7 @@ int main(void) {
 
 void W5500_Init(void){
 
-	uint8_t tmp;
+	//uint8_t tmp;
 	uint8_t memsize[2][8] = {{2, 2, 2, 2, 2, 2, 2, 2}, {2, 2, 2, 2, 2, 2, 2, 2}};
 
 	Chip_GPIO_SetPinState(LPC_GPIO, 0, 18, true); // SSEL
@@ -205,7 +222,7 @@ void UART_Init(void){
 static void Net_Conf(void){
 
 	/* wizchip netconf */
-	ctlnetwork(CN_SET_NETINFO, (void*) &gWIZNETINFO_CONF);
+	ctlnetwork(CN_SET_NETINFO, (void*) &gWIZNETINFO);
 
 }
 
