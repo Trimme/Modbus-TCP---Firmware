@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include "loopback.h"
-#include "socket.h"
-#include "wizchip_conf.h"
+#include "../Ethernet/socket.h"
+#include "../Ethernet/wizchip_conf.h"
 
-#if LOOPBACK_MODE == LOOPBACK_MAIN_NOBLCOK
+#if LOOPBACK_MODE == LOOPBACK_MAIN_NOBLOCK
 
 int32_t loopback_tcps(uint8_t sn, uint8_t* buf, uint16_t port)
 {
@@ -66,11 +66,11 @@ int32_t loopback_tcps(uint8_t sn, uint8_t* buf, uint16_t port)
          break;
       case SOCK_CLOSED:
 #ifdef _LOOPBACK_DEBUG_
-         //printf("%d:TCP server loopback start\r\n",sn);
+         printf("%d:TCP server loopback start\r\n",sn);
 #endif
          if((ret = socket(sn, Sn_MR_TCP, port, 0x00)) != sn) return ret;
 #ifdef _LOOPBACK_DEBUG_
-         //printf("%d:Socket opened\r\n",sn);
+         printf("%d:Socket opened\r\n",sn);
 #endif
          break;
       default:
@@ -208,7 +208,7 @@ int32_t loopback_udps(uint8_t sn, uint8_t* buf, uint16_t port)
          break;
       case SOCK_CLOSED:
 #ifdef _LOOPBACK_DEBUG_
-         //printf("%d:UDP loopback start\r\n",sn);
+         printf("%d:UDP loopback start\r\n",sn);
 #endif
          if((ret = socket(sn, Sn_MR_UDP, port, 0x00)) != sn)
             return ret;

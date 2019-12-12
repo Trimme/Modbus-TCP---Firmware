@@ -11,6 +11,7 @@
 #include "chip.h"
 #include "../ioLibrary_Driver/Ethernet/wizchip_conf.h"
 #include "../ioLibrary_Driver/Ethernet/socket.h"
+#include "../ioLibrary_Driver/loopback/loopback.h"
 #include <cr_section_macros.h>
 #include <stdio.h>
 //#include "stdutils.h"
@@ -36,17 +37,19 @@ STATIC RINGBUFF_T txring, rxring;
 /* Tx/Rx buffers */
 static uint8_t rxbuff[UART_RRB_SIZE], txbuff[UART_SRB_SIZE];
 
-/* __ */
+/*
 #define TICKRATE_HZ1 (1000)
 #define TICKRATE_HZ2 (1)
 volatile uint32_t msTicks;
+*/
 
 /* WizNet stuff */
+#define DATA_BUF_SIZE 2048
 
 wiz_NetInfo gWIZNETINFO = { .mac = {0x9b, 0x52, 0x9d, 0x41, 0xfc, 0x7c}, // MAC address
 				.ip = {192, 168, 1, 31}, // IP address
 				.sn = {255, 255, 255, 0}, // Subnet mask
-				.dns = {0, 0, 0, 0}, // DNS address
+				.dns = {8, 8, 8, 8}, // DNS address
 				.gw = {192, 168, 1, 1}, // Gateway address
 				.dhcp = NETINFO_STATIC};
 
@@ -91,11 +94,36 @@ int main(void) {
 
     // Display configuration
     Display_Net_Conf();
-    _delay_ms(3);
+    _delay_ms(500);
 
-    // Setup SysTick Timer
-    SysTick_Config(SystemCoreClock / TICKRATE_HZ1);
+    //uint8_t ethBuf0[DATA_BUF_SIZE];
+    uint8_t dest_ip[4] = {192, 168, 1, 32};
 
+    if(socket(3, Sn_MR_TCP, 5000, 0) != 3){
+    	printf("Socket error.\r\n");
+    }
+    else {
+    	printf("Socket 3 opened. TCP. 5000.\r\n");
+    }
+
+    _delay_ms(2000);
+
+    /*
+    int8_t temp = connect(3, dest_ip, 49983);
+    if(temp != SOCK_OK){
+    	printf("Connect error. Return: %d\r\n", temp);
+    }
+    else{
+    	printf("Connected to TCP Server. 49983.\r\n");
+    }
+	*/
+
+    if(listen(3) != SOCK_OK){
+    	printf("Listen error.\r\n");
+    }
+    else {
+    	printf("Listening on TCP port 5000.\r\n");
+    }
 
     // TODO: Code here
 
@@ -103,7 +131,6 @@ int main(void) {
     volatile static int i = 0 ;
     // Enter an infinite loop, just incrementing a counter
     while(1) {
-
 
     	/*
     	Chip_GPIO_SetPinState(LPC_GPIO, 1, 18, true);
@@ -155,6 +182,7 @@ void W5500_Init(void){
 		printf("WIZCHIP initialization failed.");
 	}
 
+	ctlwizchip(CW_RESET_PHY, 0);
 }
 
 void SSP_Init(void){
@@ -174,7 +202,7 @@ void SSP_Init(void){
 	Chip_SSP_Init(LPC_SSP);
 	Chip_SSP_SetFormat(LPC_SSP, SSP_BITS_8, SSP_FRAMEFORMAT_SPI, SSP_CLOCK_MODE0);
 	Chip_SSP_SetMaster(LPC_SSP, true);
-	Chip_SSP_SetBitRate(LPC_SSP, 100000);
+	Chip_SSP_SetBitRate(LPC_SSP, 20000000);
 	Chip_SSP_Enable(LPC_SSP);
 
 
@@ -223,7 +251,6 @@ static void Net_Conf(void){
 
 	/* wizchip netconf */
 	ctlnetwork(CN_SET_NETINFO, (void*) &gWIZNETINFO);
-
 }
 
 static void Display_Net_Conf(void){
@@ -277,7 +304,7 @@ void HANDLER_NAME(void){
 
 int _write(int iFileHandle, char *pcBuffer, int iLength){
 
-	_delay_ms(7);
+	_delay_ms(50);
 
 	int ret;
 
