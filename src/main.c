@@ -8,14 +8,21 @@
 ===============================================================================
 */
 
-#include "chip.h"
-#include "../ioLibrary_Driver/Ethernet/wizchip_conf.h"
-#include "../ioLibrary_Driver/Ethernet/socket.h"
-#include "../ioLibrary_Driver/loopback/loopback.h"
+/* ------------------------ System includes ------------------------------- */
+#include <assert.h>
 #include <cr_section_macros.h>
 #include <stdio.h>
 #include <string.h>
+
+/* ------------------------ Ethernet includes ----------------------------- */
+#include "../ioLibrary_Driver/Ethernet/wizchip_conf.h"
+#include "../ioLibrary_Driver/Ethernet/socket.h"
+#include "../ioLibrary_Driver/loopback/loopback.h"
 //#include "stdutils.h"
+
+/* ------------------------ Project includes ------------------------------ */
+#include "chip.h"
+
 
 // TODO: insert other definitions and declarations here
 
@@ -102,6 +109,7 @@ int main(void) {
 
     printf("Testing over. Please reset.\r\n");
 
+    eMBTCPInit( USHORT ucTCPPort );
     // TODO: Code here
 
     // Force the counter to be placed into memory
