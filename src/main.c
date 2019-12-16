@@ -52,7 +52,13 @@ volatile uint32_t msTicks;
 */
 
 /* WizNet stuff */
-#define DATA_BUF_SIZE 2048
+#define MB_TCP_BUF_SIZE  2048
+uint8_t ucTCPRequestFrame[MB_TCP_BUF_SIZE];   // Receive buffer
+uint16_t ucTCPRequestLen;
+uint8_t ucTCPResponseFrame[MB_TCP_BUF_SIZE];   // Transmit buffer
+uint16_t ucTCPResponseLen;
+uint8_t bFrameSent = FALSE;   // Send response flag
+
 
 wiz_NetInfo gWIZNETINFO = { .mac = {0x9b, 0x52, 0x9d, 0x41, 0xfc, 0x7c}, // MAC address
 				.ip = {192, 168, 1, 31}, // IP address
@@ -146,7 +152,6 @@ int main(void) {
 
 void TCP_Testing(void){
 
-    uint8_t ethBuf0[DATA_BUF_SIZE];
 	int32_t temp;
 	uint8_t temp2 = 0;
     uint8_t dest_ip[4] = {192, 168, 1, 32};
@@ -381,31 +386,27 @@ void _delay_ms(uint16_t ms){
 	}
 
 }
-
 void modbus_tcps(uint8_t sn, uint16_t port)
 {
-	switch(getSn_SR(sn)) {    //Get socket status
-		case SOCK_CLOSED:     //Socket is in closed state
-			socket(sn,Sn_MR_TCP,port,0x00);  //Open socket
+	switch(getSn_SR(sn)) {    // Get socket status
+		case SOCK_CLOSED:     // Socket is in closed state
+			socket(sn, Sn_MR_TCP, port, 0x00);  //Open socket
 			break;
-		case SOCK_INIT :  //Socket is in initialized state
-			listen(sn);  //Listen
+		case SOCK_INIT :  // Socket is in initialized state
+			listen(sn);  // Listen
 			break;
-		case SOCK_ESTABLISHED :   //Socket is in connected state
+		case SOCK_ESTABLISHED :   // Socket is in connected state
 			if(getSn_IR(sn) & Sn_IR_CON) {
-				setSn_IR(sn,Sn_IR_CON);
+				setSn_IR(sn, Sn_IR_CON);
 			}
-			ucTCPRequestLen = getSn_RX_RSR(sn); //Get the length of the received data
-			if(ucTCPRequestLen>0) {
-				recv(sn,ucTCPRequestFrame, ucTCPRequestLen); //W5500 receives data
-				xMBPortEventPost(EV_FRAME_RECEIVED);  //Send EV_FRAME_RECEIVED event to drive the state machine in eMBpoll() function
-				eMBPoll();   //Process EV_FRAME_RECEIVED event
-				eMBPoll();   //Handle EV_EXECUTE event
-				if(bFrameSent) {
-					bFrameSent = FALSE;
-					//W5500 sends Modbus response packet
-					send(sn,ucTCPResponseFrame,ucTCPResponseLen);
-				}
+			ucTCPRequestLen = recv(sn, ucTCPRequestFrame, MB_TCP_BUF_SIZE); // W5500 receives data
+			xMBPortEventPost(EV_FRAME_RECEIVED);  // Send EV_FRAME_RECEIVED event to drive the state machine in eMBpoll() function
+			eMBPoll();   // Process EV_FRAME_RECEIVED event
+			eMBPoll();   // Handle EV_EXECUTE event
+			if(bFrameSent) {
+				bFrameSent = FALSE;
+				// W5500 sends Modbus response packet
+				send(sn, ucTCPResponseFrame, ucTCPResponseLen);
 			}
 			break;
 		case SOCK_CLOSE_WAIT :   //Socket is waiting to close

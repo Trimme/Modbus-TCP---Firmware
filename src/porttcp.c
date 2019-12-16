@@ -8,31 +8,29 @@
 
 BOOL xMBTCPPortInit (USHORT usTCPPort)
 {
-    SOCKET sn;
-    sn = 0;
-    if (getSn_SR (sn) == SOCK_CLOSED)
-    {
-       socket (sn, Sn_MR_TCP, usTCPPort, 0x00);  // open socket
-    }
-    if (getSn_SR (sn) == SOCK_INIT )
-    {
-     listen (sn); // listen
-     return TRUE;
-    }
-    return FALSE;
+	SOCKET sn;
+	sn = 0;
+	if (getSn_SR (sn) == SOCK_CLOSED) {
+		socket (sn, Sn_MR_TCP, usTCPPort, 0x00);  // open socket
+	}
+	if (getSn_SR (sn) == SOCK_INIT ) {
+		listen (sn); // listen
+		return TRUE;
+	}
+	return FALSE;
 }
 
 BOOL xMBTCPPortGetRequest (UCHAR ** ppucMBTCPFrame, USHORT * usTCPLength)
 {
-    * ppucMBTCPFrame = (uint8_t *) & ucTCPRequestFrame [0];
-    * usTCPLength = ucTCPRequestLen;
-    / * Reset the buffer. * /
-    UcTCPRequestLen = 0;
-    return TRUE;
+	*ppucMBTCPFrame = (uint8_t *) & ucTCPRequestFrame [0];
+	*usTCPLength = ucTCPRequestLen;
+	/ * Reset the buffer. * /
+	UcTCPRequestLen = 0;
+	return TRUE;
 }
 
 
-XMBTCPPortSendResponse BOOL (UCHAR * const pucMBTCPFrame, USHORT usTCPLength)
+BOOL xMBTCPPortSendResponse (UCHAR * const pucMBTCPFrame, USHORT usTCPLength)
 {
       memcpy (ucTCPResponseFrame, pucMBTCPFrame, usTCPLength);
       ucTCPResponseLen = usTCPLength;
