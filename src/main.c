@@ -205,6 +205,8 @@ void TCP_Testing(void){
         temp = 0;
 
     }
+
+    close(3); // Close socket
 }
 
 void W5500_Init(void){
@@ -214,12 +216,12 @@ void W5500_Init(void){
 
 	Chip_GPIO_SetPinState(LPC_GPIO, 0, 18, true); // SSEL
 
-	/*
-	Chip_GPIO_SetPinState(LPC_GPIO, 0, 22, true);
-	tmp = 0xFF;
-	while(tmp--);
-	Chip_GPIO_SetPinState(LPC_GPIO, 0, 22, false);
-	*/
+
+	Chip_GPIO_SetPinState(LPC_GPIO, 0, 1, false);
+	_delay_ms(250);
+	Chip_GPIO_SetPinState(LPC_GPIO, 0, 1, true);
+	_delay_ms(750);
+
 
 	reg_wizchip_cs_cbfunc(wizchip_select, wizchip_deselect);
 	reg_wizchip_spi_cbfunc(wizchip_read, wizchip_write);
