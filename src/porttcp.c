@@ -34,7 +34,7 @@ BOOL xMBTCPPortGetRequest (UCHAR ** ppucMBTCPFrame, USHORT * usTCPLength)
 
 XMBTCPPortSendResponse BOOL (UCHAR * const pucMBTCPFrame, USHORT usTCPLength)
 {
-      the memcpy (ucTCPResponseFrame, pucMBTCPFrame, usTCPLength);
+      memcpy (ucTCPResponseFrame, pucMBTCPFrame, usTCPLength);
       ucTCPResponseLen = usTCPLength;
       bFrameSent = TRUE; // W5500 transmits data by
       return bFrameSent;

@@ -381,3 +381,37 @@ void _delay_ms(uint16_t ms){
 	}
 
 }
+
+void modbus_tcps(uint8_t sn, uint16_t port)
+{
+	switch(getSn_SR(sn)) {    //Get socket status
+		case SOCK_CLOSED:     //Socket is in closed state
+			socket(sn,Sn_MR_TCP,port,0x00);  //Open socket
+			break;
+		case SOCK_INIT :  //Socket is in initialized state
+			listen(sn);  //Listen
+			break;
+		case SOCK_ESTABLISHED :   //Socket is in connected state
+			if(getSn_IR(sn) & Sn_IR_CON) {
+				setSn_IR(sn,Sn_IR_CON);
+			}
+			ucTCPRequestLen = getSn_RX_RSR(sn); //Get the length of the received data
+			if(ucTCPRequestLen>0) {
+				recv(sn,ucTCPRequestFrame, ucTCPRequestLen); //W5500 receives data
+				xMBPortEventPost(EV_FRAME_RECEIVED);  //Send EV_FRAME_RECEIVED event to drive the state machine in eMBpoll() function
+				eMBPoll();   //Process EV_FRAME_RECEIVED event
+				eMBPoll();   //Handle EV_EXECUTE event
+				if(bFrameSent) {
+					bFrameSent = FALSE;
+					//W5500 sends Modbus response packet
+					send(sn,ucTCPResponseFrame,ucTCPResponseLen);
+				}
+			}
+			break;
+		case SOCK_CLOSE_WAIT :   //Socket is waiting to close
+			disconnect(sn); // Close the connection
+			break;
+		default:
+			break;
+   }
+}
