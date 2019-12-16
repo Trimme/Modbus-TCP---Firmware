@@ -14,6 +14,7 @@
 #include "../ioLibrary_Driver/loopback/loopback.h"
 #include <cr_section_macros.h>
 #include <stdio.h>
+#include <string.h>
 //#include "stdutils.h"
 
 // TODO: insert other definitions and declarations here
@@ -58,6 +59,7 @@ void GPIO_Init(void);
 void UART_Init(void);
 void SSP_Init(void);
 void W5500_Init(void);
+void TCP_Testing(void);
 
 static void Net_Conf(void);
 static void Display_Net_Conf(void);
@@ -96,34 +98,9 @@ int main(void) {
     Display_Net_Conf();
     _delay_ms(500);
 
-    //uint8_t ethBuf0[DATA_BUF_SIZE];
-    uint8_t dest_ip[4] = {192, 168, 1, 32};
+    TCP_Testing();
 
-    if(socket(3, Sn_MR_TCP, 5000, 0) != 3){
-    	printf("Socket error.\r\n");
-    }
-    else {
-    	printf("Socket 3 opened. TCP. 5000.\r\n");
-    }
-
-    _delay_ms(2000);
-
-    /*
-    int8_t temp = connect(3, dest_ip, 49983);
-    if(temp != SOCK_OK){
-    	printf("Connect error. Return: %d\r\n", temp);
-    }
-    else{
-    	printf("Connected to TCP Server. 49983.\r\n");
-    }
-	*/
-
-    if(listen(3) != SOCK_OK){
-    	printf("Listen error.\r\n");
-    }
-    else {
-    	printf("Listening on TCP port 5000.\r\n");
-    }
+    printf("Testing over. Please reset.\r\n");
 
     // TODO: Code here
 
@@ -157,6 +134,77 @@ int main(void) {
         i++ ;
     }
     return 0;
+}
+
+void TCP_Testing(void){
+
+    uint8_t ethBuf0[DATA_BUF_SIZE];
+	int32_t temp;
+	uint8_t temp2 = 0;
+    uint8_t dest_ip[4] = {192, 168, 1, 32};
+
+    if(socket(3, Sn_MR_TCP, 5000, 0) != 3){
+    	printf("Socket error.\r\n");
+    	return;
+    }
+    else {
+    	printf("Socket 3 opened. TCP. 5000.\r\n");
+    }
+
+    _delay_ms(2000);
+
+    /*
+    int8_t temp = connect(3, dest_ip, 49983);
+    if(temp != SOCK_OK){
+    	printf("Connect error. Return: %d\r\n", temp);
+    }
+    else{
+    	printf("Connected to TCP Server. 49983.\r\n");
+    }
+	*/
+
+    if(listen(3) != SOCK_OK){
+    	printf("Listen error.\r\n");
+    	return;
+    }
+    else {
+    	printf("Listening on TCP port 5000.\r\n");
+    }
+
+    _delay_ms(50);
+
+    while(temp2 != SOCK_ESTABLISHED){
+    	getsockopt(3, SO_STATUS, &temp2);
+    }
+    printf("Connection established.\r\n");
+
+    _delay_ms(50);
+
+    while(1){
+
+        temp = recv(3, ethBuf0, 2048);
+
+        for(int i = 0; i < temp; i++){
+        	printf("%c", ethBuf0[i]);
+        }
+        printf("\r\n");
+
+        _delay_ms(50);
+
+        if(ethBuf0[0] == 'X'){
+
+        	sprintf((char*)ethBuf0, "Shutting down...\r\n");
+        	send(3, ethBuf0, 18);
+        	break;
+        }
+
+        //sprintf((char*)ethBuf0, "Meddelande mottaget\r\n");
+
+        send(3, ethBuf0, temp); // Echo received message
+
+        temp = 0;
+
+    }
 }
 
 void W5500_Init(void){
