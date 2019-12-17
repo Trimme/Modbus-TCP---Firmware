@@ -144,7 +144,7 @@ int main(void) {
     printf("Testing over. Please reset.\r\n");
 
     eMBTCPInit(ucTCPPort);
-    eMBEnable()
+    eMBEnable();
     // TODO: Code here
 
     // Force the counter to be placed into memory
