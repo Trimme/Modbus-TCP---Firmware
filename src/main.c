@@ -52,8 +52,8 @@ volatile uint32_t msTicks;
 */
 
 /* FreeModbus stuff */
-#define ucTCPPort        502
-#define MB_TCP_BUF_SIZE  2048
+#define ucTCPPort             502
+#define MB_TCP_BUF_SIZE       2048
 
 #define REG_INPUT_START       0x0000                // Input register start address
 #define REG_INPUT_NREGS       16                    // Number of input registers
@@ -64,8 +64,8 @@ volatile uint32_t msTicks;
 #define REG_COILS_START       0x0000                // Coil start address
 #define REG_COILS_SIZE        16                    // Number of coils
 
-#define REG_DISCRETE_START    0x0000                // Start address of switch register
-#define REG_DISCRETE_SIZE     16                    // Number of switch registers
+#define REG_DISCRETE_START    0x0000                // Start address of discrete inputs
+#define REG_DISCRETE_SIZE     16                    // Number of discrete inputs
 
 
 uint8_t ucTCPRequestFrame[MB_TCP_BUF_SIZE];   // Receive buffer
@@ -78,13 +78,13 @@ uint8_t bFrameSent = FALSE;   // Send response flag
 uint16_t usRegInputBuf[REG_INPUT_NREGS] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16};
 // Input register start address
 uint16_t usRegInputStart = REG_INPUT_START;
-// register content
+// Holding register content
 uint16_t usRegHoldingBuf[REG_HOLDING_NREGS] = {16,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1};
-//
+// Holding register start address
 uint16_t usRegHoldingStart = REG_HOLDING_START;
-// register content
+// Coil status
 uint8_t ucRegCoilsBuf[REG_COILS_SIZE / 8] = {0xFF, 0x00};
-//
+// Discrete input status
 uint8_t ucRegDiscreteBuf[REG_DISCRETE_SIZE / 8] = {0x00,0xFF};
 
 /* WizNet stuff */
@@ -143,8 +143,10 @@ int main(void) {
 
     printf("Testing over. Please reset.\r\n");
 
-    eMBTCPInit(ucTCPPort);
-    eMBEnable()
+    if (eMBTCPInit(ucTCPPort) != MB_ENOERR) {
+    	printf("Modbus TCP initilization failed.\r\n");
+	};
+    eMBEnable();
     // TODO: Code here
 
     // Force the counter to be placed into memory
