@@ -25,7 +25,7 @@
 #include <assert.h>
 #include <inttypes.h>
 
-#define	INLINE
+#define	INLINE                      inline
 #define PR_BEGIN_EXTERN_C           extern "C" {
 #define	PR_END_EXTERN_C             }
 
@@ -47,11 +47,11 @@ typedef uint32_t ULONG;
 typedef int32_t LONG;
 
 #ifndef TRUE
-#define TRUE            1
+#define TRUE                    1
 #endif
 
 #ifndef FALSE
-#define FALSE           0
+#define FALSE                   0
 #endif
 
 #endif

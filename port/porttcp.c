@@ -4,6 +4,14 @@
  *  Created on: 16 Dec 2019
  *      Author: David
  */
+/* ----------------------- System includes ----------------------------------*/
+#include <stdio.h>
+#include <string.h>
+#include "port.h"
+
+/* ----------------------- Modbus includes ----------------------------------*/
+#include "../modbus/include/mb.h"
+#include "../modbus/include/mbport.h"
 
 
 BOOL xMBTCPPortInit (USHORT usTCPPort)

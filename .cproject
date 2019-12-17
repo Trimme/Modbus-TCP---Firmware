@@ -91,8 +91,8 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lpc_chip_175x_6x/inc}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Modbus_TCP-Firmware/ioLibrary_Driver}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Modbus_TCP-Firmware/modbus/include}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Modbus_TCP-Firmware/modbus/rtu}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Modbus_TCP-Firmware/modbus/tcp}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Modbus_TCP-Firmware/port}&quot;"/>
 								</option>
 								<option id="gnu.both.asm.option.warnings.nowarn.1086329436" name="Suppress warnings (-W)" superClass="gnu.both.asm.option.warnings.nowarn"/>
 								<option id="gnu.both.asm.option.version.496279102" name="Announce version (-v)" superClass="gnu.both.asm.option.version"/>
@@ -185,6 +185,7 @@
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="inc"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="ioLibrary_Driver"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="modbus"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="port"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
 					</sourceEntries>
 				</configuration>
