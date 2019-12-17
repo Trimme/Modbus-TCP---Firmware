@@ -91,6 +91,8 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lpc_chip_175x_6x/inc}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Modbus_TCP-Firmware/ioLibrary_Driver}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Modbus_TCP-Firmware/modbus/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Modbus_TCP-Firmware/modbus/rtu}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Modbus_TCP-Firmware/modbus/tcp}&quot;"/>
 								</option>
 								<option id="gnu.both.asm.option.warnings.nowarn.1086329436" name="Suppress warnings (-W)" superClass="gnu.both.asm.option.warnings.nowarn"/>
 								<option id="gnu.both.asm.option.version.496279102" name="Announce version (-v)" superClass="gnu.both.asm.option.version"/>

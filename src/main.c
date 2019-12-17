@@ -51,15 +51,43 @@ static uint8_t rxbuff[UART_RRB_SIZE], txbuff[UART_SRB_SIZE];
 volatile uint32_t msTicks;
 */
 
-/* WizNet stuff */
+/* FreeModbus stuff */
+#define ucTCPPort        502
 #define MB_TCP_BUF_SIZE  2048
+
+#define REG_INPUT_START       0x0000                // Input register start address
+#define REG_INPUT_NREGS       16                    // Number of input registers
+
+#define REG_HOLDING_START     0x0000                // Holding register start address
+#define REG_HOLDING_NREGS     16                    // Number of holding registers
+
+#define REG_COILS_START       0x0000                // Coil start address
+#define REG_COILS_SIZE        16                    // Number of coils
+
+#define REG_DISCRETE_START    0x0000                // Start address of switch register
+#define REG_DISCRETE_SIZE     16                    // Number of switch registers
+
+
 uint8_t ucTCPRequestFrame[MB_TCP_BUF_SIZE];   // Receive buffer
 uint16_t ucTCPRequestLen;
 uint8_t ucTCPResponseFrame[MB_TCP_BUF_SIZE];   // Transmit buffer
 uint16_t ucTCPResponseLen;
 uint8_t bFrameSent = FALSE;   // Send response flag
 
+// Input register content
+uint16_t usRegInputBuf[REG_INPUT_NREGS] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16};
+// Input register start address
+uint16_t usRegInputStart = REG_INPUT_START;
+// register content
+uint16_t usRegHoldingBuf[REG_HOLDING_NREGS] = {16,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1};
+//
+uint16_t usRegHoldingStart = REG_HOLDING_START;
+// register content
+uint8_t ucRegCoilsBuf[REG_COILS_SIZE / 8] = {0xFF, 0x00};
+//
+uint8_t ucRegDiscreteBuf[REG_DISCRETE_SIZE / 8] = {0x00,0xFF};
 
+/* WizNet stuff */
 wiz_NetInfo gWIZNETINFO = { .mac = {0x9b, 0x52, 0x9d, 0x41, 0xfc, 0x7c}, // MAC address
 				.ip = {192, 168, 1, 31}, // IP address
 				.sn = {255, 255, 255, 0}, // Subnet mask
@@ -115,7 +143,8 @@ int main(void) {
 
     printf("Testing over. Please reset.\r\n");
 
-    eMBTCPInit( USHORT ucTCPPort );
+    eMBTCPInit(ucTCPPort);
+    eMBEnable()
     // TODO: Code here
 
     // Force the counter to be placed into memory
