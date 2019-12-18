@@ -25,6 +25,7 @@
 
 // TODO: insert other definitions and declarations here
 
+
 /* SSP */
 #define BUFFER_SIZE (0x100)
 #define LPC_SSP LPC_SSP1
@@ -52,31 +53,77 @@ volatile uint32_t msTicks;
 
 /* FreeModbus stuff */
 
-#define REG_INPUT_START       0x0000                // Input register start address
-#define REG_INPUT_NREGS       16                    // Number of input registers
+/* Discrete Inputs */
+//discrete_dig1
+//discrete_dig2
+//discrete_dig3
+//discrete_dig4
+//discrete_dig5
+//discrete_dig6
+//discrete_dig7
+//discrete_dig8
+//discrete_dig9
+//discrete_dig10
+//discrete_dig11
+//discrete_dig12
+//discrete_warn
+//discrete_alarm
+//discrete_temp_warn
+//
+///* Coils */
+//coil_start
+//coil_quickstop
+//coil_reverse
+//coil_en_swashreg
+//coil_en_pressreg
+//coil_dig1
+//coil_dig2
+//coil_dig3
+//coil_dig4
+//
+///* Input Registers */
+//input_reg_pumpcrnt
+//input_reg_swashangle
+//input_reg_hipress
+//input_reg_pt100
+//input_reg_analog1
+//input_reg_analog2
+//input_reg_analog3
+//input_reg_analog4
+//input_reg_analog5
+//input_reg_analog6
 
-#define REG_HOLDING_START     0x0000                // Holding register start address
-#define REG_HOLDING_NREGS     16                    // Number of holding registers
+/* Holding Registers */
+//hold_setpoint
 
-#define REG_COILS_START       0x0000                // Coil start address
-#define REG_COILS_SIZE        16                    // Number of coils
 
 #define REG_DISCRETE_START    0x0000                // Start address of discrete inputs
-#define REG_DISCRETE_SIZE     16                    // Number of discrete inputs
+#define REG_DISCRETE_SIZE     15                    // Number of discrete inputs
+
+#define REG_COILS_START       0x1000                // Coil start address
+#define REG_COILS_SIZE        9                     // Number of coils
+
+#define REG_INPUT_START       0x2000                // Input register start address
+#define REG_INPUT_NREGS       10                    // Number of input registers
+
+#define REG_HOLDING_START     0x3000                // Holding register start address
+#define REG_HOLDING_NREGS     1                     // Number of holding registers
+
+
 
 
 // Input register content
-uint16_t usRegInputBuf[REG_INPUT_NREGS] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16};
+uint16_t usRegInputBuf[REG_INPUT_NREGS] = {0,};
 // Input register start address
 uint16_t usRegInputStart = REG_INPUT_START;
 // Holding register content
-uint16_t usRegHoldingBuf[REG_HOLDING_NREGS] = {16,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1};
+uint16_t usRegHoldingBuf[REG_HOLDING_NREGS] = {0,};
 // Holding register start address
 uint16_t usRegHoldingStart = REG_HOLDING_START;
 // Coil status
-uint8_t ucRegCoilsBuf[REG_COILS_SIZE / 8] = {0xFF, 0x00};
+uint8_t ucRegCoilsBuf[2] = {0,};
 // Discrete input status
-uint8_t ucRegDiscreteBuf[REG_DISCRETE_SIZE / 8] = {0x00,0xFF};
+uint8_t ucRegDiscreteBuf[2] = {0,};
 
 /* WizNet stuff */
 wiz_NetInfo gWIZNETINFO = { .mac = {0x9b, 0x52, 0x9d, 0x41, 0xfc, 0x7c}, // MAC address
@@ -408,3 +455,4 @@ void _delay_ms(uint16_t ms){
 	}
 
 }
+
