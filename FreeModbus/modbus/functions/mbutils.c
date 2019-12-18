@@ -32,11 +32,11 @@
 #include "string.h"
 
 /* ----------------------- Platform includes --------------------------------*/
-#include "../include/port.h"
+#include "port.h"
 
 /* ----------------------- Modbus includes ----------------------------------*/
-#include "../include/mb.h"
-#include "../include/mbproto.h"
+#include "mb.h"
+#include "mbproto.h"
 
 /* ----------------------- Defines ------------------------------------------*/
 #define BITS_UCHAR      8U

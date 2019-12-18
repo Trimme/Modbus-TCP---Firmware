@@ -7,8 +7,8 @@
 
 
 /* ----------------------- Modbus includes ----------------------------------*/
-#include "../modbus/include/mb.h"
-#include "../modbus/include/mbport.h"
+#include "mb.h"
+#include "mbport.h"
 
 /* ----------------------- Variables ----------------------------------------*/
 static eMBEventType   eQueuedEvent;

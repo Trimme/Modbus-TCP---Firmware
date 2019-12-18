@@ -14,15 +14,14 @@
 #include <stdio.h>
 #include <string.h>
 
-/* ------------------------ Ethernet includes ----------------------------- */
-#include "../modbus/include/mb.h"
-#include "../ioLibrary_Driver/Ethernet/wizchip_conf.h"
-#include "../ioLibrary_Driver/Ethernet/socket.h"
-#include "../ioLibrary_Driver/loopback/loopback.h"
-
 /* ------------------------ Project includes ------------------------------ */
 #include "chip.h"
 
+/* ------------------------ Ethernet includes ----------------------------- */
+#include "mb.h"
+#include "wizchip_conf.h"
+#include "socket.h"
+#include "loopback.h"
 
 // TODO: insert other definitions and declarations here
 
@@ -52,8 +51,6 @@ volatile uint32_t msTicks;
 */
 
 /* FreeModbus stuff */
-#define ucTCPPort             502
-#define MB_TCP_BUF_SIZE       2048
 
 #define REG_INPUT_START       0x0000                // Input register start address
 #define REG_INPUT_NREGS       16                    // Number of input registers
@@ -67,12 +64,6 @@ volatile uint32_t msTicks;
 #define REG_DISCRETE_START    0x0000                // Start address of discrete inputs
 #define REG_DISCRETE_SIZE     16                    // Number of discrete inputs
 
-
-uint8_t ucTCPRequestFrame[MB_TCP_BUF_SIZE];   // Receive buffer
-uint16_t ucTCPRequestLen;
-uint8_t ucTCPResponseFrame[MB_TCP_BUF_SIZE];   // Transmit buffer
-uint16_t ucTCPResponseLen;
-uint8_t bFrameSent = FALSE;   // Send response flag
 
 // Input register content
 uint16_t usRegInputBuf[REG_INPUT_NREGS] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16};
@@ -139,11 +130,11 @@ int main(void) {
     Display_Net_Conf();
     _delay_ms(500);
 
-    TCP_Testing();
+//    TCP_Testing();
 
     printf("Testing over. Please reset.\r\n");
 
-    if (eMBTCPInit(ucTCPPort) != MB_ENOERR) {
+    if (eMBTCPInit(MB_TCP_PORT_USE_DEFAULT) != MB_ENOERR) {
     	printf("Modbus TCP initilization failed.\r\n");
 	};
     eMBEnable();
@@ -416,34 +407,4 @@ void _delay_ms(uint16_t ms){
 		for(i = 10000; i > 0; i--);
 	}
 
-}
-void modbus_tcps(uint8_t sn, uint16_t port)
-{
-	switch(getSn_SR(sn)) {    // Get socket status
-		case SOCK_CLOSED:     // Socket is in closed state
-			socket(sn, Sn_MR_TCP, port, 0x00);  //Open socket
-			break;
-		case SOCK_INIT :  // Socket is in initialized state
-			listen(sn);  // Listen
-			break;
-		case SOCK_ESTABLISHED :   // Socket is in connected state
-			if(getSn_IR(sn) & Sn_IR_CON) {
-				setSn_IR(sn, Sn_IR_CON);
-			}
-			ucTCPRequestLen = recv(sn, ucTCPRequestFrame, MB_TCP_BUF_SIZE); // W5500 receives data
-			xMBPortEventPost(EV_FRAME_RECEIVED);  // Send EV_FRAME_RECEIVED event to drive the state machine in eMBpoll() function
-			eMBPoll();   // Process EV_FRAME_RECEIVED event
-			eMBPoll();   // Handle EV_EXECUTE event
-			if(bFrameSent) {
-				bFrameSent = FALSE;
-				// W5500 sends Modbus response packet
-				send(sn, ucTCPResponseFrame, ucTCPResponseLen);
-			}
-			break;
-		case SOCK_CLOSE_WAIT :   //Socket is waiting to close
-			disconnect(sn); // Close the connection
-			break;
-		default:
-			break;
-   }
 }
