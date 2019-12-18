@@ -19,6 +19,7 @@
 
 /* ------------------------ Ethernet includes ----------------------------- */
 #include "mb.h"
+#include "mbutils.h"
 #include "wizchip_conf.h"
 #include "socket.h"
 #include "loopback.h"
@@ -109,9 +110,6 @@ volatile uint32_t msTicks;
 #define REG_HOLDING_START     0x3000                // Holding register start address
 #define REG_HOLDING_NREGS     1                     // Number of holding registers
 
-
-
-
 // Input register content
 uint16_t usRegInputBuf[REG_INPUT_NREGS] = {0,};
 // Input register start address
@@ -126,12 +124,12 @@ uint8_t ucRegCoilsBuf[2] = {0,};
 uint8_t ucRegDiscreteBuf[2] = {0,};
 
 /* WizNet stuff */
-wiz_NetInfo gWIZNETINFO = { .mac = {0x9b, 0x52, 0x9d, 0x41, 0xfc, 0x7c}, // MAC address
-				.ip = {192, 168, 1, 31}, // IP address
-				.sn = {255, 255, 255, 0}, // Subnet mask
-				.dns = {8, 8, 8, 8}, // DNS address
-				.gw = {192, 168, 1, 1}, // Gateway address
-				.dhcp = NETINFO_STATIC};
+wiz_NetInfo gWIZNETINFO = {.mac = {0x9b, 0x52, 0x9d, 0x41, 0xfc, 0x7c}, // MAC address
+                           .ip = {192, 168, 1, 31},                     // IP address
+                           .sn = {255, 255, 255, 0},                    // Subnet mask
+                           .dns = {8, 8, 8, 8},                         // DNS address
+                           .gw = {192, 168, 1, 1},                      // Gateway address
+                           .dhcp = NETINFO_STATIC};
 
 /* Function declarations */
 void GPIO_Init(void);
@@ -291,8 +289,8 @@ int main(void) {
 //    close(3); // Close socket
 //}
 
-void W5500_Init(void){
-
+void W5500_Init(void)
+{
 	//uint8_t tmp;
 	uint8_t memsize[2][8] = {{2, 2, 2, 2, 2, 2, 2, 2}, {2, 2, 2, 2, 2, 2, 2, 2}};
 
@@ -317,8 +315,8 @@ void W5500_Init(void){
 	ctlwizchip(CW_RESET_PHY, 0);
 }
 
-void SSP_Init(void){
-
+void SSP_Init(void)
+{
 	/* Init Pins */
 	Chip_IOCON_PinMux(LPC_IOCON, 0, 7, IOCON_MODE_INACT, IOCON_FUNC2); // SCK1
 	Chip_IOCON_PinMux(LPC_IOCON, 0, 8, IOCON_MODE_INACT, IOCON_FUNC2); // MISO1
@@ -336,22 +334,20 @@ void SSP_Init(void){
 	Chip_SSP_SetMaster(LPC_SSP, true);
 	Chip_SSP_SetBitRate(LPC_SSP, 20000000);
 	Chip_SSP_Enable(LPC_SSP);
-
-
 }
 
-void GPIO_Init(void){
-
+void GPIO_Init(void)
+{
     /* Init GPIO */
     Chip_GPIO_Init(LPC_GPIO);
     Chip_GPIO_SetPinDIROutput(LPC_GPIO, 1, 18);
     Chip_GPIO_SetPinDIROutput(LPC_GPIO, 1, 20);
     Chip_GPIO_SetPinDIROutput(LPC_GPIO, 1, 21);
     Chip_GPIO_SetPinDIROutput(LPC_GPIO, 1, 23);
-
 }
-void UART_Init(void){
 
+void UART_Init(void)
+{
     /* Init Pins */
     Chip_IOCON_PinMux(LPC_IOCON, 0, 10, IOCON_MODE_INACT, IOCON_FUNC1); // IOCON P0.10 TXD2 (func1), no pull
     Chip_IOCON_PinMux(LPC_IOCON, 0, 11, IOCON_MODE_INACT, IOCON_FUNC1); // IOCON P0.11 RXD2 (func1), no pull
@@ -376,17 +372,16 @@ void UART_Init(void){
     /* preemption = 1, sub-priority = 1 */
     NVIC_SetPriority(IRQ_SELECTION, 1);
     NVIC_EnableIRQ(IRQ_SELECTION);
-
 }
 
-static void Net_Conf(void){
-
+static void Net_Conf(void)
+{
 	/* wizchip netconf */
 	ctlnetwork(CN_SET_NETINFO, (void*) &gWIZNETINFO);
 }
 
-static void Display_Net_Conf(void){
-
+static void Display_Net_Conf(void)
+{
 	uint8_t tmpstr[6] = {0,};
 	wiz_NetInfo gWIZNETINFO;
 
@@ -395,8 +390,12 @@ static void Display_Net_Conf(void){
 	// Display Network Information
 	ctlwizchip(CW_GET_ID,(void*)tmpstr);
 
-	if(gWIZNETINFO.dhcp == NETINFO_DHCP) printf("\r\n===== %s NET CONF : DHCP =====\r\n",(char*)tmpstr);
-		else printf("\r\n===== %s NET CONF : Static =====\r\n",(char*)tmpstr);
+	if (gWIZNETINFO.dhcp == NETINFO_DHCP) {
+		printf("\r\n===== %s NET CONF : DHCP =====\r\n",(char*)tmpstr);
+	}
+	else {
+		printf("\r\n===== %s NET CONF : Static =====\r\n",(char*)tmpstr);
+	}
 	printf(" MAC : %02X:%02X:%02X:%02X:%02X:%02X\r\n", gWIZNETINFO.mac[0], gWIZNETINFO.mac[1], gWIZNETINFO.mac[2], gWIZNETINFO.mac[3], gWIZNETINFO.mac[4], gWIZNETINFO.mac[5]);
 	printf(" IP : %d.%d.%d.%d\r\n", gWIZNETINFO.ip[0], gWIZNETINFO.ip[1], gWIZNETINFO.ip[2], gWIZNETINFO.ip[3]);
 	printf(" GW : %d.%d.%d.%d\r\n", gWIZNETINFO.gw[0], gWIZNETINFO.gw[1], gWIZNETINFO.gw[2], gWIZNETINFO.gw[3]);
@@ -404,38 +403,38 @@ static void Display_Net_Conf(void){
 	printf("===================================\r\n");
 }
 
-void wizchip_select(void){
+void wizchip_select(void)
+{
 	Chip_GPIO_SetPinState(LPC_GPIO, 0, 18, false); // SSEL
 }
 
-void wizchip_deselect(){
+void wizchip_deselect()
+{
 	Chip_GPIO_SetPinState(LPC_GPIO, 0, 18, true); // SSEL
 }
 
-void wizchip_write(uint8_t wb){
-
+void wizchip_write(uint8_t wb)
+{
 	Chip_SSP_WriteFrames_Blocking(LPC_SSP, &wb, 1);
 
 }
 
-uint8_t wizchip_read(void){
-
+uint8_t wizchip_read(void)
+{
 	uint8_t rb;
 
 	Chip_SSP_ReadFrames_Blocking(LPC_SSP, &rb, 1);
 
 	return rb;
-
 }
 
-void HANDLER_NAME(void){
-
+void HANDLER_NAME(void)
+{
 	Chip_UART_IRQRBHandler(UART_SELECTION, &rxring, &txring);
-
 }
 
-int _write(int iFileHandle, char *pcBuffer, int iLength){
-
+int _write(int iFileHandle, char *pcBuffer, int iLength)
+{
 	_delay_ms(50);
 
 	int ret;
@@ -445,14 +444,142 @@ int _write(int iFileHandle, char *pcBuffer, int iLength){
 	return ret;
 }
 
-void _delay_ms(uint16_t ms){
-
+void _delay_ms(uint16_t ms)
+{
 	uint16_t delay;
 	volatile uint32_t i;
 
 	for(delay = ms; delay > 0; delay--){
 		for(i = 10000; i > 0; i--);
 	}
-
 }
 
+eMBErrorCode eMBRegInputCB(UCHAR * pucRegBuffer, USHORT usAddress, USHORT usNRegs)
+{
+	eMBErrorCode    eStatus = MB_ENOERR;
+	int             iRegIndex;
+
+    // Query if it is in the register range
+    // To avoid warnings, modify to signed integer
+	if( ( (int16_t) usAddress >= REG_INPUT_START ) \
+		&& ( usAddress + usNRegs <= REG_INPUT_START + REG_INPUT_NREGS ) ) {
+		iRegIndex = ( int )( usAddress - usRegInputStart );
+		while( usNRegs > 0 ) {
+			*pucRegBuffer++ = ( unsigned char )( usRegInputBuf[iRegIndex] >> 8 );
+			*pucRegBuffer++ = ( unsigned char )( usRegInputBuf[iRegIndex] & 0xFF );
+			iRegIndex++;
+			usNRegs--;
+		}
+	}
+	else {
+		eStatus = MB_ENOREG;
+	}
+
+	return eStatus;
+}
+
+eMBErrorCode eMBRegHoldingCB(UCHAR * pucRegBuffer, USHORT usAddress, USHORT usNRegs,
+                             eMBRegisterMode eMode)
+{
+	eMBErrorCode    eStatus = MB_ENOERR;
+	int             iRegIndex;
+
+	if( ( (int16_t)usAddress >= REG_HOLDING_START ) \
+		&& ( usAddress + usNRegs <= REG_HOLDING_START + REG_HOLDING_NREGS ) ) {
+		iRegIndex = ( int )( usAddress - usRegHoldingStart );
+		switch ( eMode ) {
+		case MB_REG_READ:
+			while( usNRegs > 0 ) {
+				*pucRegBuffer++ = ( unsigned char )( usRegHoldingBuf[iRegIndex] >> 8 );
+				*pucRegBuffer++ = ( unsigned char )( usRegHoldingBuf[iRegIndex] & 0xFF );
+				iRegIndex++;
+				usNRegs--;
+			}
+			break;
+
+		case MB_REG_WRITE:
+			while( usNRegs > 0 ) {
+				usRegHoldingBuf[iRegIndex] = *pucRegBuffer++ << 8;
+				usRegHoldingBuf[iRegIndex] |= *pucRegBuffer++;
+				iRegIndex++;
+				usNRegs--;
+			}
+			break;
+		}
+	}
+	else {
+		eStatus = MB_ENOREG;
+	}
+
+	return eStatus;
+}
+
+eMBErrorCode eMBRegCoilsCB(UCHAR * pucRegBuffer, USHORT usAddress, USHORT usNCoils,
+                           eMBRegisterMode eMode)
+{
+    eMBErrorCode    eStatus = MB_ENOERR;
+    short           iNCoils = ( short )usNCoils;
+    unsigned short  usBitOffset;
+
+    if( ( (int16_t)usAddress >= REG_COILS_START ) &&
+       ( usAddress + usNCoils <= REG_COILS_START + REG_COILS_SIZE ) )
+    {
+        usBitOffset = ( unsigned short )( usAddress - REG_COILS_START );
+        switch ( eMode )
+        {
+
+        case MB_REG_READ:
+            while( iNCoils > 0 )
+            {
+                *pucRegBuffer++ = xMBUtilGetBits( ucRegCoilsBuf, usBitOffset,
+                                                 ( unsigned char )( iNCoils > 8 ? 8 : iNCoils ) );
+                iNCoils -= 8;
+                usBitOffset += 8;
+            }
+            break;
+
+        case MB_REG_WRITE:
+            while( iNCoils > 0 )
+            {
+                xMBUtilSetBits( ucRegCoilsBuf, usBitOffset,
+                               ( unsigned char )( iNCoils > 8 ? 8 : iNCoils ),
+                               *pucRegBuffer++ );
+                iNCoils -= 8;
+                usBitOffset += 8;
+            }
+            break;
+        }
+
+    }
+    else
+    {
+        eStatus = MB_ENOREG;
+    }
+    return eStatus;
+}
+
+eMBErrorCode eMBRegDiscreteCB(UCHAR * pucRegBuffer, USHORT usAddress, USHORT usNDiscrete)
+{
+    eMBErrorCode    eStatus = MB_ENOERR;
+    short           iNDiscrete = ( short )usNDiscrete;
+    unsigned short  usBitOffset;
+
+    if( ( (int16_t)usAddress >= REG_DISCRETE_START ) &&
+       ( usAddress + usNDiscrete <= REG_DISCRETE_START + REG_DISCRETE_SIZE ) )
+    {
+        usBitOffset = ( unsigned short )( usAddress - REG_DISCRETE_START );
+
+        while( iNDiscrete > 0 )
+        {
+            *pucRegBuffer++ = xMBUtilGetBits( ucRegDiscreteBuf, usBitOffset,
+                                             ( unsigned char)( iNDiscrete > 8 ? 8 : iNDiscrete ) );
+            iNDiscrete -= 8;
+            usBitOffset += 8;
+        }
+    }
+    else
+    {
+        eStatus = MB_ENOREG;
+    }
+    return eStatus;
+}

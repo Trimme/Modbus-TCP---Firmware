@@ -31,13 +31,14 @@ BOOL xMBTCPPortInit (USHORT usTCPPort)
 {
 	SOCKET sn;
 	sn = 0;
-	if (getSn_SR (sn) == SOCK_CLOSED) {
-		socket (sn, Sn_MR_TCP, usTCPPort, 0x00);  // open socket
+	if (getSn_SR(sn) == SOCK_CLOSED) {
+		socket(sn, Sn_MR_TCP, usTCPPort, 0x00);  // open socket
 	}
-	if (getSn_SR (sn) == SOCK_INIT ) {
-		listen (sn); // listen
+	if (getSn_SR(sn) == SOCK_INIT ) {
+		listen(sn); // listen
 		return TRUE;
 	}
+
 	return FALSE;
 }
 
@@ -47,16 +48,18 @@ BOOL xMBTCPPortGetRequest (UCHAR **ppucMBTCPFrame, USHORT *usTCPLength)
 	*usTCPLength = ucTCPRequestLen;
 	/* Reset the buffer. */
 	ucTCPRequestLen = 0;
+
 	return TRUE;
 }
 
 
 BOOL xMBTCPPortSendResponse (const UCHAR *pucMBTCPFrame, USHORT usTCPLength)
 {
-      memcpy (ucTCPResponseFrame, pucMBTCPFrame, usTCPLength);
-      ucTCPResponseLen = usTCPLength;
-      bFrameSent = TRUE; // W5500 transmits data by
-      return bFrameSent;
+	memcpy (ucTCPResponseFrame, pucMBTCPFrame, usTCPLength);
+	ucTCPResponseLen = usTCPLength;
+	bFrameSent = TRUE; // W5500 transmits data by
+
+	return bFrameSent;
 }
 
 void modbus_tcps(uint8_t sn, uint16_t port)
@@ -69,14 +72,14 @@ void modbus_tcps(uint8_t sn, uint16_t port)
 			listen(sn);  // Listen
 			break;
 		case SOCK_ESTABLISHED :   // Socket is in connected state
-			if(getSn_IR(sn) & Sn_IR_CON) {
+			if (getSn_IR(sn) & Sn_IR_CON) {
 				setSn_IR(sn, Sn_IR_CON);
 			}
 			ucTCPRequestLen = recv(sn, ucTCPRequestFrame, MB_TCP_BUF_SIZE); // W5500 receives data
 			xMBPortEventPost(EV_FRAME_RECEIVED);  // Send EV_FRAME_RECEIVED event to drive the state machine in eMBpoll() function
 			eMBPoll();   // Process EV_FRAME_RECEIVED event
 			eMBPoll();   // Handle EV_EXECUTE event
-			if(bFrameSent) {
+			if (bFrameSent) {
 				bFrameSent = FALSE;
 				// W5500 sends Modbus response packet
 				send(sn, ucTCPResponseFrame, ucTCPResponseLen);
@@ -89,8 +92,6 @@ void modbus_tcps(uint8_t sn, uint16_t port)
 			break;
    }
 }
-
-
 
 void vMBTCPPortClose (void)
 {
