@@ -17,16 +17,18 @@
 /* ------------------------ Project includes ------------------------------ */
 #include "chip.h"
 
-/* ------------------------ Ethernet includes ----------------------------- */
-#include "mb.h"
-#include "mbutils.h"
+/* ------------------------ Wiznet includes ------------------------------ */
 #include "wizchip_conf.h"
 #include "socket.h"
 #include "loopback.h"
 
+/* ------------------------ Modbus includes ----------------------------- */
+#include "mb.h"
+#include "mbutils.h"
+
 // TODO: insert other definitions and declarations here
 
-
+/* ------------------------ Defines ----------------------------- */
 /* SSP */
 #define BUFFER_SIZE (0x100)
 #define LPC_SSP LPC_SSP1
@@ -36,14 +38,14 @@
 #define IRQ_SELECTION UART2_IRQn
 #define HANDLER_NAME UART2_IRQHandler
 
-/* Tx/Rx ring buffers */
+/* UART Tx/Rx ring buffers */
 STATIC RINGBUFF_T txring, rxring;
 
-/* Ring buffer sizes */
+/* UART Ring buffer sizes */
 #define UART_SRB_SIZE 128
 #define UART_RRB_SIZE 32
 
-/* Tx/Rx buffers */
+/* UART Tx/Rx buffers */
 static uint8_t rxbuff[UART_RRB_SIZE], txbuff[UART_SRB_SIZE];
 
 /*
