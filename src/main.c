@@ -71,62 +71,51 @@ volatile uint32_t msTicks;
 
 /* Discrete Inputs */
 #define DISCRETE_WARN          0x0000
-#define DISCRETE_ALARM         0x0000
-#define DISCRETE_TEMP_WARN     0x0000
-#define DISCRETE_DIG1          0x0000
-#define DISCRETE_DIG2          0x0000
-#define DISCRETE_DIG3          0x0000
-#define DISCRETE_DIG4          0x0000
-#define DISCRETE_DIG5          0x0000
-#define DISCRETE_DIG6          0x0000
-#define DISCRETE_DIG7          0x0000
-#define DISCRETE_DIG8          0x0000
-#define DISCRETE_DIG9          0x0000
-#define DISCRETE_DIG10         0x0000
-#define DISCRETE_DIG11         0x0000
-#define DISCRETE_DIG12         0x0000
+#define DISCRETE_ALARM         0x0001
+#define DISCRETE_TEMP_WARN     0x0002
+#define DISCRETE_DIG1          0x0003
+#define DISCRETE_DIG2          0x0004
+#define DISCRETE_DIG3          0x0005
+#define DISCRETE_DIG4          0x0006
+#define DISCRETE_DIG5          0x0007
+#define DISCRETE_DIG6          0x0008
+#define DISCRETE_DIG7          0x0009
+#define DISCRETE_DIG8          0x000A
+#define DISCRETE_DIG9          0x000B
+#define DISCRETE_DIG10         0x000C
+#define DISCRETE_DIG11         0x000D
+#define DISCRETE_DIG12         0x000E
 
 ///* Coils */
 #define COIL_START             0x1000
-#define COIL_QUICKSTOP         0x1000
-#define COIL_REVERSE           0x1000
-#define COIL_EN_SWASHREG       0x1000
-#define COIL_EN_PRESSREG       0x1000
-#define COIL_DIG1              0x1000
-#define COIL_DIG2              0x1000
-#define COIL_DIG3              0x1000
-#define COIL_DIG4              0x1000
+#define COIL_QUICKSTOP         0x1001
+#define COIL_REVERSE           0x1002
+#define COIL_EN_SWASHREG       0x1003
+#define COIL_EN_PRESSREG       0x1004
+#define COIL_DIG1              0x1005
+#define COIL_DIG2              0x1006
+#define COIL_DIG3              0x1007
+#define COIL_DIG4              0x1008
 
 ///* Input Registers */
 #define INPUT_REG_PUMPCRNT     0x2000
-#define INPUT_REG_SWASHANGLE   0x2000
-#define INPUT_REG_HIPRESS      0x2000
-#define INPUT_REG_PT100        0x2000
-#define INPUT_REG_ANALOG1      0x2000
-#define INPUT_REG_ANALOG2      0x2000
-#define INPUT_REG_ANALOG3      0x2000
-#define INPUT_REG_ANALOG4      0x2000
-#define INPUT_REG_ANALOG5      0x2000
-#define INPUT_REG_ANALOG6      0x2000
+#define INPUT_REG_SWASHANGLE   0x2001
+#define INPUT_REG_HIPRESS      0x2002
+#define INPUT_REG_PT100        0x2003
+#define INPUT_REG_ANALOG1      0x2004
+#define INPUT_REG_ANALOG2      0x2005
+#define INPUT_REG_ANALOG3      0x2006
+#define INPUT_REG_ANALOG4      0x2007
+#define INPUT_REG_ANALOG5      0x2008
+#define INPUT_REG_ANALOG6      0x2009
 
 /* Holding Registers */
 #define HOLD_SETPOINT          0x3000
 
-uint16_t discrete_inputs;
-uint16_t coils;
-
-// Input register content
-uint16_t usRegInputBuf[REG_INPUT_NREGS] = {0,};
-// Input register start address
-uint16_t usRegInputStart = REG_INPUT_START;
-// Holding register content
-uint16_t usRegHoldingBuf[REG_HOLDING_NREGS] = {0,};
-// Holding register start address
-uint16_t usRegHoldingStart = REG_HOLDING_START;
-// Coil status
-uint8_t ucRegCoilsBuf[2] = {0,};
-// Discrete input status
-uint8_t ucRegDiscreteBuf[2] = {0,};
+uint8_t discrete_inputs[(REG_DISCRETE_SIZE + 7) / 8];
+uint8_t coils[(REG_COILS_SIZE + 7) / 8];
+uint16_t input_regs[REG_INPUT_NREGS];
+uint16_t holding_regs[REG_HOLDING_NREGS];
 
 /* WizNet stuff */
 wiz_NetInfo gWIZNETINFO = {.mac = {0x9b, 0x52, 0x9d, 0x41, 0xfc, 0x7c}, // MAC address
