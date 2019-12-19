@@ -57,52 +57,6 @@ volatile uint32_t msTicks;
 */
 
 /* FreeModbus stuff */
-/* Discrete Inputs */
-uint16_t discrete_inputs;
-//discrete_dig1
-//discrete_dig2
-//discrete_dig3
-//discrete_dig4
-//discrete_dig5
-//discrete_dig6
-//discrete_dig7
-//discrete_dig8
-//discrete_dig9
-//discrete_dig10
-//discrete_dig11
-//discrete_dig12
-//discrete_warn
-//discrete_alarm
-//discrete_temp_warn
-//
-///* Coils */
-uint16_t coils;
-//coil_start
-//coil_quickstop
-//coil_reverse
-//coil_en_swashreg
-//coil_en_pressreg
-//coil_dig1
-//coil_dig2
-//coil_dig3
-//coil_dig4
-//
-///* Input Registers */
-//input_reg_pumpcrnt
-//input_reg_swashangle
-//input_reg_hipress
-//input_reg_pt100
-//input_reg_analog1
-//input_reg_analog2
-//input_reg_analog3
-//input_reg_analog4
-//input_reg_analog5
-//input_reg_analog6
-
-/* Holding Registers */
-//hold_setpoint
-
-
 #define REG_DISCRETE_START    0x0000                // Start address of discrete inputs
 #define REG_DISCRETE_SIZE     15                    // Number of discrete inputs
 
@@ -114,6 +68,52 @@ uint16_t coils;
 
 #define REG_HOLDING_START     0x3000                // Holding register start address
 #define REG_HOLDING_NREGS     1                     // Number of holding registers
+
+/* Discrete Inputs */
+#define DISCRETE_WARN          0x0000
+#define DISCRETE_ALARM         0x0000
+#define DISCRETE_TEMP_WARN     0x0000
+#define DISCRETE_DIG1          0x0000
+#define DISCRETE_DIG2          0x0000
+#define DISCRETE_DIG3          0x0000
+#define DISCRETE_DIG4          0x0000
+#define DISCRETE_DIG5          0x0000
+#define DISCRETE_DIG6          0x0000
+#define DISCRETE_DIG7          0x0000
+#define DISCRETE_DIG8          0x0000
+#define DISCRETE_DIG9          0x0000
+#define DISCRETE_DIG10         0x0000
+#define DISCRETE_DIG11         0x0000
+#define DISCRETE_DIG12         0x0000
+
+///* Coils */
+#define COIL_START             0x1000
+#define COIL_QUICKSTOP         0x1000
+#define COIL_REVERSE           0x1000
+#define COIL_EN_SWASHREG       0x1000
+#define COIL_EN_PRESSREG       0x1000
+#define COIL_DIG1              0x1000
+#define COIL_DIG2              0x1000
+#define COIL_DIG3              0x1000
+#define COIL_DIG4              0x1000
+
+///* Input Registers */
+#define INPUT_REG_PUMPCRNT     0x2000
+#define INPUT_REG_SWASHANGLE   0x2000
+#define INPUT_REG_HIPRESS      0x2000
+#define INPUT_REG_PT100        0x2000
+#define INPUT_REG_ANALOG1      0x2000
+#define INPUT_REG_ANALOG2      0x2000
+#define INPUT_REG_ANALOG3      0x2000
+#define INPUT_REG_ANALOG4      0x2000
+#define INPUT_REG_ANALOG5      0x2000
+#define INPUT_REG_ANALOG6      0x2000
+
+/* Holding Registers */
+#define HOLD_SETPOINT          0x3000
+
+uint16_t discrete_inputs;
+uint16_t coils;
 
 // Input register content
 uint16_t usRegInputBuf[REG_INPUT_NREGS] = {0,};
