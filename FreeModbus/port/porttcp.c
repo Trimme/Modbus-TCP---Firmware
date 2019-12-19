@@ -62,7 +62,7 @@ BOOL xMBTCPPortInit (USHORT usTCPPort)
 
 BOOL xMBTCPPortGetRequest (UCHAR **ppucMBTCPFrame, USHORT *usTCPLength)
 {
-	*ppucMBTCPFrame = (uint8_t *) & ucTCPRequestFrame [0];
+	*ppucMBTCPFrame = &ucTCPRequestFrame[0];
 	*usTCPLength = ucTCPRequestLen;
 	/* Reset the buffer. */
 	ucTCPRequestLen = 0;
