@@ -17,15 +17,17 @@
 /* ------------------------ Project includes ------------------------------ */
 #include "chip.h"
 
-/* ------------------------ Wiznet includes ------------------------------ */
+/* ------------------------ Wiznet includes ------------------------------- */
 #include "wizchip_conf.h"
 #include "socket.h"
 #include "loopback.h"
 
-/* ------------------------ Modbus includes ----------------------------- */
+/* ------------------------ Modbus includes ------------------------------- */
 #include "mb.h"
 #include "mbutils.h"
 
+/* ------------------------ Utilities includes ---------------------------- */
+#include "stdutils.h"
 // TODO: insert other definitions and declarations here
 
 /* ------------------------ Defines ----------------------------- */
@@ -494,7 +496,7 @@ eMBErrorCode eMBRegHoldingCB(UCHAR * pucRegBuffer, USHORT usAddress, USHORT usNR
 		case MB_REG_READ:
 			while(usNRegs > 0) {
 				*pucRegBuffer++ = (unsigned char)(usRegHoldingBuf[iRegIndex] >> 8);
-				*pucRegBuffer++ = (unsignedchar)(usRegHoldingBuf[iRegIndex] & 0xFF);
+				*pucRegBuffer++ = (unsigned char)(usRegHoldingBuf[iRegIndex] & 0xFF);
 				iRegIndex++;
 				usNRegs--;
 			}
