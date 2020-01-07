@@ -112,20 +112,17 @@ volatile uint32_t msTicks;
 /* Holding Registers */
 #define HOLD_SETPOINT          0x3000
 
-uint8_t discrete_inputs[(REG_DISCRETE_SIZE + 7) / 8];
-uint8_t coils[(REG_COILS_SIZE + 7) / 8];
-uint16_t input_regs[REG_INPUT_NREGS];
-uint16_t holding_regs[REG_HOLDING_NREGS];
+/* Modbus Register Buffers */
+static uint8_t ucRegDiscreteBuf[(REG_DISCRETE_SIZE + 7) / 8];
+static uint8_t ucRegCoilsBuf[(REG_COILS_SIZE + 7) / 8];
+static uint16_t usRegInputBuf[REG_INPUT_NREGS];
+static uint16_t usRegHoldingBuf[REG_HOLDING_NREGS];
 
-//static uint16_t usRegDiscreteStart = REG_DISCRETE_START;
-static uint8_t discrete_inputs[(REG_DISCRETE_SIZE + 7) / 8];
-//static uint16_t usRegCoilsStart = REG_COILS_START;
-static uint8_t coils[(REG_COILS_SIZE + 7) / 8];
-
-//static uint16_t usRegInputStart = REG_INPUT_START;
-//static uint16_t usRegInputBuf[REG_INPUT_NREGS];
-//static uint16_t usRegHoldingStart = REG_HOLDING_START;
-//static uint16_t usRegHoldingBuf[REG_HOLDING_NREGS];
+/* Modbus Register Start Addresses */
+static uint16_t usRegDiscreteStart = REG_DISCRETE_START;
+static uint16_t usRegCoilsStart = REG_COILS_START;
+static uint16_t usRegInputStart = REG_INPUT_START;
+static uint16_t usRegHoldingStart = REG_HOLDING_START;
 
 /* WizNet stuff */
 wiz_NetInfo gWIZNETINFO = {.mac = {0x9b, 0x52, 0x9d, 0x41, 0xfc, 0x7c}, // MAC address
@@ -155,6 +152,7 @@ void HANDLER_NAME(void);
 
 int main(void) {
 
+	usRegInputBuf[0] = 64;
 	// Read clock settings and update SystemCoreClock variable
     SystemCoreClockUpdate();
 
