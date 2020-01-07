@@ -4,7 +4,7 @@
  Author      : $(author)
  Version     :
  Copyright   : $(copyright)
- Description : main definition
+ Description : Modbus TCP Implementation for NXP LPC176xx and Wiznet W5500
 ===============================================================================
 */
 
@@ -86,7 +86,7 @@ volatile uint32_t msTicks;
 #define DISCRETE_DIG11         0x000D
 #define DISCRETE_DIG12         0x000E
 
-///* Coils */
+/* Coils */
 #define COIL_START             0x1000
 #define COIL_QUICKSTOP         0x1001
 #define COIL_REVERSE           0x1002
@@ -97,7 +97,7 @@ volatile uint32_t msTicks;
 #define COIL_DIG3              0x1007
 #define COIL_DIG4              0x1008
 
-///* Input Registers */
+/* Input Registers */
 #define INPUT_REG_PUMPCRNT     0x2000
 #define INPUT_REG_SWASHANGLE   0x2001
 #define INPUT_REG_HIPRESS      0x2002
@@ -116,6 +116,16 @@ uint8_t discrete_inputs[(REG_DISCRETE_SIZE + 7) / 8];
 uint8_t coils[(REG_COILS_SIZE + 7) / 8];
 uint16_t input_regs[REG_INPUT_NREGS];
 uint16_t holding_regs[REG_HOLDING_NREGS];
+
+//static uint16_t usRegDiscreteStart = REG_DISCRETE_START;
+static uint8_t discrete_inputs[(REG_DISCRETE_SIZE + 7) / 8];
+//static uint16_t usRegCoilsStart = REG_COILS_START;
+static uint8_t coils[(REG_COILS_SIZE + 7) / 8];
+
+//static uint16_t usRegInputStart = REG_INPUT_START;
+//static uint16_t usRegInputBuf[REG_INPUT_NREGS];
+//static uint16_t usRegHoldingStart = REG_HOLDING_START;
+//static uint16_t usRegHoldingBuf[REG_HOLDING_NREGS];
 
 /* WizNet stuff */
 wiz_NetInfo gWIZNETINFO = {.mac = {0x9b, 0x52, 0x9d, 0x41, 0xfc, 0x7c}, // MAC address
@@ -570,3 +580,17 @@ eMBErrorCode eMBRegDiscreteCB(UCHAR * pucRegBuffer, USHORT usAddress, USHORT usN
 
 	return eStatus;
 }
+
+//void LinkProcessData(void)
+//{
+//	// input process data (from masters point of view)
+//	usRegInputBuf[0] = u32Heartbeat;
+//	usRegInputBuf[2] = u16ADCData;
+//	usRegInputBuf[4] = u16DataIn;
+//
+//	// output process data (from masters point of view)
+//	u16DataOut = usRegHoldingBuf[ 4];
+//	u8LedRed = usRegHoldingBuf[ 8];
+//	u8LedGreen = usRegHoldingBuf[12];
+//	u8LedBlue = usRegHoldingBuf[16];
+//}
