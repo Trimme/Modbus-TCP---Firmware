@@ -343,11 +343,23 @@ void SSP_Init(void)
 void GPIO_Init(void)
 {
     /* Init GPIO */
-    Chip_GPIO_Init(LPC_GPIO);
-    Chip_GPIO_SetPinDIROutput(LPC_GPIO, 1, 18);
-    Chip_GPIO_SetPinDIROutput(LPC_GPIO, 1, 20);
-    Chip_GPIO_SetPinDIROutput(LPC_GPIO, 1, 21);
-    Chip_GPIO_SetPinDIROutput(LPC_GPIO, 1, 23);
+	Chip_GPIO_Init(LPC_GPIO);
+    /* Set all pins as outputs in low state */
+//	Chip_GPIO_SetPortDIR(LPC_GPIO, 0, 0xFFFFFFFF, true);
+//	Chip_GPIO_SetPortDIR(LPC_GPIO, 1, 0xFFFFFFFF, true);
+//	Chip_GPIO_SetPortDIR(LPC_GPIO, 2, 0xFFFFFFFF, true);
+//	Chip_GPIO_SetPortDIR(LPC_GPIO, 3, 0xFFFFFFFF, true);
+//	Chip_GPIO_SetPortDIR(LPC_GPIO, 4, 0xFFFFFFFF, true);
+//	Chip_GPIO_SetPortOutLow(LPC_GPIO, 0, 0xFFFFFFFF);
+//	Chip_GPIO_SetPortOutLow(LPC_GPIO, 1, 0xFFFFFFFF);
+//	Chip_GPIO_SetPortOutLow(LPC_GPIO, 2, 0xFFFFFFFF);
+//	Chip_GPIO_SetPortOutLow(LPC_GPIO, 3, 0xFFFFFFFF);
+//	Chip_GPIO_SetPortOutLow(LPC_GPIO, 4, 0xFFFFFFFF);
+
+	Chip_GPIO_SetPinDIROutput(LPC_GPIO, 1, 18);
+	Chip_GPIO_SetPinDIROutput(LPC_GPIO, 1, 20);
+	Chip_GPIO_SetPinDIROutput(LPC_GPIO, 1, 21);
+	Chip_GPIO_SetPinDIROutput(LPC_GPIO, 1, 23);
 }
 
 void UART_Init(void)
