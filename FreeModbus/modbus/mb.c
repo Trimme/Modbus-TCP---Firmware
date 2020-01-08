@@ -388,6 +388,7 @@ eMBPoll( void )
              * return a reply. */
             if( ucRcvAddress != MB_ADDRESS_BROADCAST )
             {
+
                 if( eException != MB_EX_NONE )
                 {
                     /* An exception occured. Build an error frame. */

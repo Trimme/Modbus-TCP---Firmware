@@ -57,60 +57,60 @@ volatile uint32_t msTicks;
 */
 
 /* FreeModbus stuff */
-#define REG_DISCRETE_START    0x0000                // Start address of discrete inputs
+#define REG_DISCRETE_START    10001                // Start address of discrete inputs
 #define REG_DISCRETE_SIZE     15                    // Number of discrete inputs
 
-#define REG_COILS_START       0x1000                // Coil start address
+#define REG_COILS_START       00001                // Coil start address
 #define REG_COILS_SIZE        9                     // Number of coils
 
-#define REG_INPUT_START       0x2000                // Input register start address
+#define REG_INPUT_START       30001                // Input register start address
 #define REG_INPUT_NREGS       10                    // Number of input registers
 
-#define REG_HOLDING_START     0x3000                // Holding register start address
+#define REG_HOLDING_START     40001                // Holding register start address
 #define REG_HOLDING_NREGS     1                     // Number of holding registers
 
 /* Discrete Inputs */
-#define DISCRETE_WARN          0x0000
-#define DISCRETE_ALARM         0x0001
-#define DISCRETE_TEMP_WARN     0x0002
-#define DISCRETE_DIG1          0x0003
-#define DISCRETE_DIG2          0x0004
-#define DISCRETE_DIG3          0x0005
-#define DISCRETE_DIG4          0x0006
-#define DISCRETE_DIG5          0x0007
-#define DISCRETE_DIG6          0x0008
-#define DISCRETE_DIG7          0x0009
-#define DISCRETE_DIG8          0x000A
-#define DISCRETE_DIG9          0x000B
-#define DISCRETE_DIG10         0x000C
-#define DISCRETE_DIG11         0x000D
-#define DISCRETE_DIG12         0x000E
+#define DISCRETE_WARN          10001
+#define DISCRETE_ALARM         10002
+#define DISCRETE_TEMP_WARN     10003
+#define DISCRETE_DIG1          10004
+#define DISCRETE_DIG2          10005
+#define DISCRETE_DIG3          10006
+#define DISCRETE_DIG4          10007
+#define DISCRETE_DIG5          10008
+#define DISCRETE_DIG6          10009
+#define DISCRETE_DIG7          10010
+#define DISCRETE_DIG8          10011
+#define DISCRETE_DIG9          10012
+#define DISCRETE_DIG10         10013
+#define DISCRETE_DIG11         10014
+#define DISCRETE_DIG12         10015
 
 /* Coils */
-#define COIL_START             0x1000
-#define COIL_QUICKSTOP         0x1001
-#define COIL_REVERSE           0x1002
-#define COIL_EN_SWASHREG       0x1003
-#define COIL_EN_PRESSREG       0x1004
-#define COIL_DIG1              0x1005
-#define COIL_DIG2              0x1006
-#define COIL_DIG3              0x1007
-#define COIL_DIG4              0x1008
+#define COIL_START             00001
+#define COIL_QUICKSTOP         00002
+#define COIL_REVERSE           00003
+#define COIL_EN_SWASHREG       00004
+#define COIL_EN_PRESSREG       00005
+#define COIL_DIG1              00006
+#define COIL_DIG2              00007
+#define COIL_DIG3              00008
+#define COIL_DIG4              00009
 
 /* Input Registers */
-#define INPUT_REG_PUMPCRNT     0x2000
-#define INPUT_REG_SWASHANGLE   0x2001
-#define INPUT_REG_HIPRESS      0x2002
-#define INPUT_REG_PT100        0x2003
-#define INPUT_REG_ANALOG1      0x2004
-#define INPUT_REG_ANALOG2      0x2005
-#define INPUT_REG_ANALOG3      0x2006
-#define INPUT_REG_ANALOG4      0x2007
-#define INPUT_REG_ANALOG5      0x2008
-#define INPUT_REG_ANALOG6      0x2009
+#define INPUT_REG_PUMPCRNT     30001
+#define INPUT_REG_SWASHANGLE   30002
+#define INPUT_REG_HIPRESS      30003
+#define INPUT_REG_PT100        30004
+#define INPUT_REG_ANALOG1      30005
+#define INPUT_REG_ANALOG2      30006
+#define INPUT_REG_ANALOG3      30007
+#define INPUT_REG_ANALOG4      30008
+#define INPUT_REG_ANALOG5      30009
+#define INPUT_REG_ANALOG6      30010
 
 /* Holding Registers */
-#define HOLD_SETPOINT          0x3000
+#define HOLD_SETPOINT          40001
 
 /* Modbus Register Buffers */
 static uint8_t ucRegDiscreteBuf[(REG_DISCRETE_SIZE + 7) / 8];
@@ -119,8 +119,8 @@ static uint16_t usRegInputBuf[REG_INPUT_NREGS];
 static uint16_t usRegHoldingBuf[REG_HOLDING_NREGS];
 
 /* Modbus Register Start Addresses */
-static uint16_t usRegDiscreteStart = REG_DISCRETE_START;
-static uint16_t usRegCoilsStart = REG_COILS_START;
+//static uint16_t usRegDiscreteStart = REG_DISCRETE_START;
+//static uint16_t usRegCoilsStart = REG_COILS_START;
 static uint16_t usRegInputStart = REG_INPUT_START;
 static uint16_t usRegHoldingStart = REG_HOLDING_START;
 
@@ -132,11 +132,17 @@ wiz_NetInfo gWIZNETINFO = {.mac = {0x9b, 0x52, 0x9d, 0x41, 0xfc, 0x7c}, // MAC a
                            .gw = {192, 168, 1, 1},                      // Gateway address
                            .dhcp = NETINFO_STATIC};
 
+/* Other */
+uint8_t serial_data[5] = {0};
+
 /* Function declarations */
 void GPIO_Init(void);
 void UART_Init(void);
 void SSP_Init(void);
 void W5500_Init(void);
+
+void data_poll(void);
+
 void TCP_Testing(void);
 
 static void Net_Conf(void);
@@ -177,13 +183,15 @@ int main(void) {
     Display_Net_Conf();
     _delay_ms(500);
 
-//    TCP_Testing();
 
-    printf("Testing over. Please reset.\r\n");
-
+    // Modbus initialization
     if (eMBTCPInit(MB_TCP_PORT_USE_DEFAULT) != MB_ENOERR) {
-    	printf("Modbus TCP initilization failed.\r\n");
+    	printf("Modbus TCP initialization failed.\r\n");
 	};
+
+    printf("Modbus TCP initialized.\r\n");
+    _delay_ms(50);
+
     eMBEnable();
     // TODO: Code here
 
@@ -191,6 +199,9 @@ int main(void) {
     volatile static int i = 0 ;
     // Enter an infinite loop, just incrementing a counter
     while(1) {
+
+    	modbus_tcps(2, 502);
+    	data_poll();
 
     	/*
     	Chip_GPIO_SetPinState(LPC_GPIO, 1, 18, true);
@@ -219,77 +230,6 @@ int main(void) {
     return 0;
 }
 
-//void TCP_Testing(void){
-//
-//	int32_t temp;
-//	uint8_t temp2 = 0;
-//    uint8_t dest_ip[4] = {192, 168, 1, 32};
-//
-//    if(socket(3, Sn_MR_TCP, 5000, 0) != 3){
-//    	printf("Socket error.\r\n");
-//    	return;
-//    }
-//    else {
-//    	printf("Socket 3 opened. TCP. 5000.\r\n");
-//    }
-//
-//    _delay_ms(2000);
-//
-//    /*
-//    int8_t temp = connect(3, dest_ip, 49983);
-//    if(temp != SOCK_OK){
-//    	printf("Connect error. Return: %d\r\n", temp);
-//    }
-//    else{
-//    	printf("Connected to TCP Server. 49983.\r\n");
-//    }
-//	*/
-//
-//    if(listen(3) != SOCK_OK){
-//    	printf("Listen error.\r\n");
-//    	return;
-//    }
-//    else {
-//    	printf("Listening on TCP port 5000.\r\n");
-//    }
-//
-//    _delay_ms(50);
-//
-//    while(temp2 != SOCK_ESTABLISHED){
-//    	getsockopt(3, SO_STATUS, &temp2);
-//    }
-//    printf("Connection established.\r\n");
-//
-//    _delay_ms(50);
-//
-//    while(1){
-//
-//        temp = recv(3, ethBuf0, 2048);
-//
-//        for(int i = 0; i < temp; i++){
-//        	printf("%c", ethBuf0[i]);
-//        }
-//        printf("\r\n");
-//
-//        _delay_ms(50);
-//
-//        if(ethBuf0[0] == 'X'){
-//
-//        	sprintf((char*)ethBuf0, "Shutting down...\r\n");
-//        	send(3, ethBuf0, 18);
-//        	break;
-//        }
-//
-//        //sprintf((char*)ethBuf0, "Meddelande mottaget\r\n");
-//
-//        send(3, ethBuf0, temp); // Echo received message
-//
-//        temp = 0;
-//
-//    }
-//
-//    close(3); // Close socket
-//}
 
 void W5500_Init(void)
 {
@@ -456,6 +396,159 @@ int _write(int iFileHandle, char *pcBuffer, int iLength)
 	ret = Chip_UART_SendRB(UART_SELECTION, &txring, (const uint8_t *) pcBuffer, iLength);
 
 	return ret;
+}
+
+void data_poll(void){
+
+	uint16_t addr;
+	uint8_t code;
+	uint16_t data;
+	uint16_t idx;
+	uint16_t bit;
+
+	Chip_UART_ReadRB(UART_SELECTION, &rxring, serial_data, 5);
+
+	if(serial_data[0] != 0 || serial_data[1] != 0){
+
+		addr = ((uint16_t)serial_data[0] << 8) | serial_data[1];
+
+		code = serial_data[2];
+
+		data = ((uint16_t)serial_data[3] << 8 | serial_data[4]);
+
+		//printf("[ %x %x ] [ %x ] [ %x %x ]\r\n", serial_data[0], serial_data[1], serial_data[2], serial_data[3], serial_data[4]);
+		printf("Received address: %05d \r\n", addr);
+		printf("Received code: %d \r\n", code);
+		printf("Received data: %d \r\n", data);
+
+
+		if((addr >= REG_COILS_START) && (addr <= REG_COILS_START + REG_COILS_SIZE)){
+
+			addr = addr - REG_COILS_START;
+
+			idx = addr / 8;
+
+			bit = addr - (idx * 8);
+
+			switch(code){
+
+				case 0:
+					printf("Value of requested Coil: [ %d ] \r\n", xMBUtilGetBits(ucRegCoilsBuf, addr, 1));
+					break;
+
+				case 1:
+					printf("Use code 10 or 11 to manipulate the value of a Coil. \r\n");
+					break;
+
+				case 10:
+					ucRegCoilsBuf[idx] &=~ (1 << bit);
+					printf("Requested Coil set to 0 \r\n");
+					break;
+
+				case 11:
+					ucRegCoilsBuf[idx] |= (1 << bit);
+					printf("Requested Coil set to 1 \r\n");
+					break;
+
+				default:
+					printf("Invalid Code. \r\n");
+					break;
+			}
+
+		}
+		else if((addr >= REG_DISCRETE_START) && (addr <= REG_DISCRETE_START + REG_DISCRETE_SIZE)){
+
+			addr = addr - REG_DISCRETE_START;
+
+			idx = addr / 8;
+
+			bit = addr - (idx * 8);
+
+			switch(code){
+
+				case 0:
+					printf("Value of requested Discrete Input: [ %d ] \r\n", xMBUtilGetBits(ucRegDiscreteBuf, addr, 1));
+					break;
+
+				case 1:
+					printf("Use code 10 or 11 to manipulate the value of a Discrete Input. \r\n");
+					break;
+
+				case 10:
+					ucRegDiscreteBuf[idx] &=~ (1 << bit);
+					printf("Requested Discrete Input set to 0 \r\n");
+					break;
+
+				case 11:
+					ucRegDiscreteBuf[idx] |= (1 << bit);
+					printf("Requested Discrete Input set to 1 \r\n");
+					break;
+
+				default:
+					printf("Invalid Code. \r\n");
+					break;
+			}
+
+		}
+		else if((addr >= REG_INPUT_START) && (addr <= REG_INPUT_START + REG_INPUT_NREGS)){
+
+			addr = addr - REG_INPUT_START;
+
+			switch(code){
+
+				case 0:
+					printf("Value in requested Input Register: [ %d ] \r\n", usRegInputBuf[addr]);
+					break;
+
+				case 1:
+					usRegInputBuf[addr] = data;
+					printf("Value put in requested Input Register. \r\n");
+					break;
+
+				default:
+					printf("Invalid Code. \r\n");
+					break;
+			}
+
+		}
+		else if((addr >= REG_HOLDING_START) && (addr <= REG_HOLDING_START + REG_HOLDING_NREGS)){
+
+			addr = addr - REG_HOLDING_START;
+
+			switch(code){
+
+				case 0:
+					printf("Value in requested Holding Register: [ %d ] \r\n", usRegHoldingBuf[addr]);
+					break;
+
+				case 1:
+					usRegHoldingBuf[addr] = data;
+					printf("Value put in requested Holding Register. \r\n");
+					break;
+
+				default:
+					printf("Invalid Code. \r\n");
+					break;
+			}
+
+		}
+		else{
+
+			printf("Address not in any defined address-space. \r\n");
+
+		}
+
+
+	}
+
+	_delay_ms(100);
+
+	serial_data[0] = 0;
+	serial_data[1] = 0;
+	serial_data[2] = 0;
+	serial_data[3] = 0;
+	serial_data[4] = 0;
+
 }
 
 void _delay_ms(uint16_t ms)
