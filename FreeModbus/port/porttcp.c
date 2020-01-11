@@ -73,7 +73,6 @@ BOOL xMBTCPPortGetRequest (UCHAR **ppucMBTCPFrame, USHORT *usTCPLength)
 
 BOOL xMBTCPPortSendResponse (const UCHAR *pucMBTCPFrame, USHORT usTCPLength)
 {
-	printf("xMBTCPPortSendResponse.");
 	memcpy (ucTCPResponseFrame, pucMBTCPFrame, usTCPLength);
 	ucTCPResponseLen = usTCPLength;
 	bFrameSent = TRUE; // W5500 transmits data by
@@ -95,6 +94,10 @@ void modbus_tcps(uint8_t sn, uint16_t port)
 				setSn_IR(sn, Sn_IR_CON);
 			}
 			ucTCPRequestLen = recv(sn, ucTCPRequestFrame, MB_TCP_BUF_SIZE); // W5500 receives data
+			/* extra */
+			if(ucTCPRequestLen == 0){
+				break;
+			}
 			xMBPortEventPost(EV_FRAME_RECEIVED);  // Send EV_FRAME_RECEIVED event to drive the state machine in eMBpoll() function
 			eMBPoll();  // Process EV_FRAME_RECEIVED event
 			eMBPoll();   // Handle EV_EXECUTE event

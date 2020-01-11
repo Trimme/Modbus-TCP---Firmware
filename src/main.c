@@ -236,12 +236,12 @@ void W5500_Init(void)
 	//uint8_t tmp;
 	uint8_t memsize[2][8] = {{2, 2, 2, 2, 2, 2, 2, 2}, {2, 2, 2, 2, 2, 2, 2, 2}};
 
-	Chip_GPIO_SetPinState(LPC_GPIO, 0, 18, true); // SSEL
+	Chip_GPIO_SetPinState(LPC_GPIO, 0, 6, true); // SSEL
 
 
-	Chip_GPIO_SetPinState(LPC_GPIO, 0, 1, false);
+	Chip_GPIO_SetPinState(LPC_GPIO, 2, 13, false);
 	_delay_ms(250);
-	Chip_GPIO_SetPinState(LPC_GPIO, 0, 1, true);
+	Chip_GPIO_SetPinState(LPC_GPIO, 2, 13, true);
 	_delay_ms(750);
 
 
@@ -264,11 +264,11 @@ void SSP_Init(void)
 	Chip_IOCON_PinMux(LPC_IOCON, 0, 8, IOCON_MODE_INACT, IOCON_FUNC2); // MISO1
 	Chip_IOCON_PinMux(LPC_IOCON, 0, 9, IOCON_MODE_INACT, IOCON_FUNC2); // MOSI1
 
-	Chip_IOCON_PinMux(LPC_IOCON, 0, 18, IOCON_MODE_PULLUP, IOCON_FUNC0);
-	Chip_GPIO_SetPinDIROutput(LPC_GPIO, 0, 18); // SSEL1
+	Chip_IOCON_PinMux(LPC_IOCON, 0, 6, IOCON_MODE_PULLUP, IOCON_FUNC0);
+	Chip_GPIO_SetPinDIROutput(LPC_GPIO, 0, 6); // SSEL1
 
-	Chip_IOCON_PinMux(LPC_IOCON, 0, 1, IOCON_MODE_PULLUP, IOCON_FUNC0);
-	Chip_GPIO_SetPinDIROutput(LPC_GPIO, 0, 1); // N_RESET
+	Chip_IOCON_PinMux(LPC_IOCON, 2, 13, IOCON_MODE_PULLUP, IOCON_FUNC0);
+	Chip_GPIO_SetPinDIROutput(LPC_GPIO, 2, 13); // N_RESET
 
 	/* SSP Init */
 	Chip_SSP_Init(LPC_SSP);
@@ -294,10 +294,11 @@ void GPIO_Init(void)
 //	Chip_GPIO_SetPortOutLow(LPC_GPIO, 3, 0xFFFFFFFF);
 //	Chip_GPIO_SetPortOutLow(LPC_GPIO, 4, 0xFFFFFFFF);
 
-	Chip_GPIO_SetPinDIROutput(LPC_GPIO, 1, 18);
-	Chip_GPIO_SetPinDIROutput(LPC_GPIO, 1, 20);
-	Chip_GPIO_SetPinDIROutput(LPC_GPIO, 1, 21);
-	Chip_GPIO_SetPinDIROutput(LPC_GPIO, 1, 23);
+	Chip_GPIO_SetPinDIROutput(LPC_GPIO, 1, 15);
+	Chip_GPIO_SetPinOutHigh(LPC_GPIO, 1, 15);
+//	Chip_GPIO_SetPinDIROutput(LPC_GPIO, 1, 20);
+//	Chip_GPIO_SetPinDIROutput(LPC_GPIO, 1, 21);
+//	Chip_GPIO_SetPinDIROutput(LPC_GPIO, 1, 23);
 }
 
 void UART_Init(void)
@@ -359,12 +360,12 @@ static void Display_Net_Conf(void)
 
 void wizchip_select(void)
 {
-	Chip_GPIO_SetPinState(LPC_GPIO, 0, 18, false); // SSEL
+	Chip_GPIO_SetPinState(LPC_GPIO, 0, 6, false); // SSEL
 }
 
 void wizchip_deselect()
 {
-	Chip_GPIO_SetPinState(LPC_GPIO, 0, 18, true); // SSEL
+	Chip_GPIO_SetPinState(LPC_GPIO, 0, 6, true); // SSEL
 }
 
 void wizchip_write(uint8_t wb)
@@ -400,11 +401,11 @@ int _write(int iFileHandle, char *pcBuffer, int iLength)
 
 void data_poll(void){
 
-	uint16_t addr;
-	uint8_t code;
-	uint16_t data;
-	uint16_t idx;
-	uint16_t bit;
+	static uint16_t addr;
+	static uint8_t code;
+	static uint16_t data;
+	static uint16_t idx;
+	static uint16_t bit;
 
 	Chip_UART_ReadRB(UART_SELECTION, &rxring, serial_data, 5);
 
@@ -568,7 +569,7 @@ eMBErrorCode eMBRegInputCB(UCHAR * pucRegBuffer, USHORT usAddress, USHORT usNReg
 
     // Query if it is in the register range
     // To avoid warnings, modify to signed integer
-	if(((int16_t) usAddress >= REG_INPUT_START) \
+	if((usAddress >= REG_INPUT_START)
        && (usAddress + usNRegs <= REG_INPUT_START + REG_INPUT_NREGS)) {
 		iRegIndex = (int)(usAddress - usRegInputStart);
 		while(usNRegs > 0) {
@@ -591,7 +592,7 @@ eMBErrorCode eMBRegHoldingCB(UCHAR * pucRegBuffer, USHORT usAddress, USHORT usNR
 	eMBErrorCode eStatus = MB_ENOERR;
 	int iRegIndex;
 
-	if(((int16_t)usAddress >= REG_HOLDING_START) \
+	if((usAddress >= REG_HOLDING_START)
        && (usAddress + usNRegs <= REG_HOLDING_START + REG_HOLDING_NREGS)) {
 		iRegIndex = (int)(usAddress - usRegHoldingStart);
 		switch (eMode) {
@@ -628,7 +629,7 @@ eMBErrorCode eMBRegCoilsCB(UCHAR * pucRegBuffer, USHORT usAddress, USHORT usNCoi
 	short iNCoils = (short)usNCoils;
 	unsigned short usBitOffset;
 
-	if(((int16_t)usAddress >= REG_COILS_START) &&
+	if((usAddress >= REG_COILS_START) &&
 		(usAddress + usNCoils <= REG_COILS_START + REG_COILS_SIZE)) {
 		usBitOffset = (unsigned short)(usAddress - REG_COILS_START);
 		switch (eMode) {
@@ -666,7 +667,7 @@ eMBErrorCode eMBRegDiscreteCB(UCHAR * pucRegBuffer, USHORT usAddress, USHORT usN
 	short iNDiscrete = ( short )usNDiscrete;
 	unsigned short usBitOffset;
 
-	if(((int16_t)usAddress >= REG_DISCRETE_START) &&
+	if((usAddress >= REG_DISCRETE_START) &&
        (usAddress + usNDiscrete <= REG_DISCRETE_START + REG_DISCRETE_SIZE)) {
 		usBitOffset = (unsigned short)(usAddress - REG_DISCRETE_START);
 
