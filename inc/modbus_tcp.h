@@ -10,7 +10,6 @@
 
 
 /* ------------------------ Defines --------------------------------------- */
-
 #define REG_DISCRETE_START    10001         // Start address of discrete inputs
 #define REG_DISCRETE_SIZE     15            // Number of discrete inputs
 

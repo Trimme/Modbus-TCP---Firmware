@@ -33,7 +33,7 @@
 #include "uart.h"
 #include "wiznet.h"
 
-// TODO: insert other definitions and declarations here
+/* ------------------------ Private Variables ----------------------------- */
 
 /* Modbus Register Buffers */
 static uint8_t ucRegDiscreteBuf[(REG_DISCRETE_SIZE + 7) / 8];
@@ -47,9 +47,15 @@ static uint16_t usRegHoldingBuf[REG_HOLDING_NREGS];
 static uint16_t usRegInputStart = REG_INPUT_START;
 static uint16_t usRegHoldingStart = REG_HOLDING_START;
 
-
-/* Other */
+/* Data Unit for UART Demo Function */
 uint8_t serial_data[5] = {0};
+
+
+/*
+===============================================================================
+--------------------------- MAIN PROGRAM --------------------------------------
+===============================================================================
+*/
 
 int main(void) {
 
@@ -60,7 +66,7 @@ int main(void) {
     /* Initialize GPIO pins for LEDs */
     GPIO_Init();
 
-    /* Initialize UART
+    /* Initialize UART */
     UART_Init();
 
     /* Initialize SSP in SPI mode */
@@ -91,8 +97,6 @@ int main(void) {
     	Error_Handler();
 	};
 
-    // TODO: Code here
-
     while (1) {
     	modbus_tcps(2, 502);
     	data_poll();
@@ -118,7 +122,6 @@ int main(void) {
 
     	_delay_ms(250);
 		*/
-
     }
     return 0;
 }
@@ -314,15 +317,23 @@ void data_poll(void)
 
 }
 
+
 void _delay_ms(uint16_t ms)
 {
-	uint16_t delay;
-	volatile uint32_t i;
-
-	for(delay = ms; delay > 0; delay--){
-		for(i = 10000; i > 0; i--);
+	for (uint16_t i = ms; i > 0; i--) {
+		for (uint32_t j = 10000; j > 0; j--);
 	}
 }
+
+//void _delay_ms(uint16_t ms)
+//{
+//	uint16_t delay;
+//	volatile uint32_t i;
+//
+//	for(delay = ms; delay > 0; delay--){
+//		for(i = 10000; i > 0; i--);
+//	}
+//}
 
 void Error_Handler(void)
 {
