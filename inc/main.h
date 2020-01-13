@@ -14,3 +14,4 @@ void GPIO_Init(void);
 int _write(int iFileHandle, char *pcBuffer, int iLength);
 void _delay_ms(uint16_t ms);
 void data_poll(void);
+void Error_Handler(void);

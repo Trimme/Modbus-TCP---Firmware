@@ -28,69 +28,12 @@
 #include "mbutils.h"
 
 /* ------------------------ Peripheral Includes --------------------------- */
-#include "uart.h"
+#include "modbus_tcp.h"
 #include "ssp_spi.h"
+#include "uart.h"
 #include "wiznet.h"
 
 // TODO: insert other definitions and declarations here
-
-/* ------------------------ Defines --------------------------------------- */
-
-/* FreeModbus stuff */
-#define REG_DISCRETE_START    10001                // Start address of discrete inputs
-#define REG_DISCRETE_SIZE     15                   // Number of discrete inputs
-
-#define REG_COILS_START       00001                // Coil start address
-#define REG_COILS_SIZE        9                    // Number of coils
-
-#define REG_INPUT_START       30001                // Input register start address
-#define REG_INPUT_NREGS       10                   // Number of input registers
-
-#define REG_HOLDING_START     40001                // Holding register start address
-#define REG_HOLDING_NREGS     1                    // Number of holding registers
-
-/* Discrete Inputs */
-#define DISCRETE_WARN          10001
-#define DISCRETE_ALARM         10002
-#define DISCRETE_TEMP_WARN     10003
-#define DISCRETE_DIG1          10004
-#define DISCRETE_DIG2          10005
-#define DISCRETE_DIG3          10006
-#define DISCRETE_DIG4          10007
-#define DISCRETE_DIG5          10008
-#define DISCRETE_DIG6          10009
-#define DISCRETE_DIG7          10010
-#define DISCRETE_DIG8          10011
-#define DISCRETE_DIG9          10012
-#define DISCRETE_DIG10         10013
-#define DISCRETE_DIG11         10014
-#define DISCRETE_DIG12         10015
-
-/* Coils */
-#define COIL_START             00001
-#define COIL_QUICKSTOP         00002
-#define COIL_REVERSE           00003
-#define COIL_EN_SWASHREG       00004
-#define COIL_EN_PRESSREG       00005
-#define COIL_DIG1              00006
-#define COIL_DIG2              00007
-#define COIL_DIG3              00008
-#define COIL_DIG4              00009
-
-/* Input Registers */
-#define INPUT_REG_PUMPCRNT     30001
-#define INPUT_REG_SWASHANGLE   30002
-#define INPUT_REG_HIPRESS      30003
-#define INPUT_REG_PT100        30004
-#define INPUT_REG_ANALOG1      30005
-#define INPUT_REG_ANALOG2      30006
-#define INPUT_REG_ANALOG3      30007
-#define INPUT_REG_ANALOG4      30008
-#define INPUT_REG_ANALOG5      30009
-#define INPUT_REG_ANALOG6      30010
-
-/* Holding Registers */
-#define HOLD_SETPOINT          40001
 
 /* Modbus Register Buffers */
 static uint8_t ucRegDiscreteBuf[(REG_DISCRETE_SIZE + 7) / 8];
@@ -103,6 +46,7 @@ static uint16_t usRegHoldingBuf[REG_HOLDING_NREGS];
 //static uint16_t usRegCoilsStart = REG_COILS_START;
 static uint16_t usRegInputStart = REG_INPUT_START;
 static uint16_t usRegHoldingStart = REG_HOLDING_START;
+
 
 /* Other */
 uint8_t serial_data[5] = {0};
@@ -134,23 +78,22 @@ int main(void) {
     Display_Net_Conf();
     _delay_ms(500);
 
-
     // Modbus initialization
     if (eMBTCPInit(MB_TCP_PORT_USE_DEFAULT) != MB_ENOERR) {
-    	printf("Modbus TCP initialization failed.\r\n");
+    	printf("ERROR: Modbus TCP initialization failed (eMBTCPInit)\r\n");
+    	Error_Handler();
 	};
 
-    printf("Modbus TCP initialized.\r\n");
     _delay_ms(50);
 
-    eMBEnable();
+    if (eMBEnable() != MB_ENOERR) {
+    	printf("ERROR: Modbus TCP not enabled (eMBEnable)\r\n");
+    	Error_Handler();
+	};
+
     // TODO: Code here
 
-    // Force the counter to be placed into memory
-    volatile static int i = 0 ;
-    // Enter an infinite loop, just incrementing a counter
-    while(1) {
-
+    while (1) {
     	modbus_tcps(2, 502);
     	data_poll();
 
@@ -176,7 +119,6 @@ int main(void) {
     	_delay_ms(250);
 		*/
 
-        i++ ;
     }
     return 0;
 }
@@ -185,23 +127,26 @@ void GPIO_Init(void)
 {
     /* Init GPIO */
 	Chip_GPIO_Init(LPC_GPIO);
-    /* Set all pins as outputs in low state */
-//	Chip_GPIO_SetPortDIR(LPC_GPIO, 0, 0xFFFFFFFF, true);
-//	Chip_GPIO_SetPortDIR(LPC_GPIO, 1, 0xFFFFFFFF, true);
-//	Chip_GPIO_SetPortDIR(LPC_GPIO, 2, 0xFFFFFFFF, true);
-//	Chip_GPIO_SetPortDIR(LPC_GPIO, 3, 0xFFFFFFFF, true);
-//	Chip_GPIO_SetPortDIR(LPC_GPIO, 4, 0xFFFFFFFF, true);
-//	Chip_GPIO_SetPortOutLow(LPC_GPIO, 0, 0xFFFFFFFF);
-//	Chip_GPIO_SetPortOutLow(LPC_GPIO, 1, 0xFFFFFFFF);
-//	Chip_GPIO_SetPortOutLow(LPC_GPIO, 2, 0xFFFFFFFF);
-//	Chip_GPIO_SetPortOutLow(LPC_GPIO, 3, 0xFFFFFFFF);
-//	Chip_GPIO_SetPortOutLow(LPC_GPIO, 4, 0xFFFFFFFF);
 
+    /* Set all pins as outputs in low state */
+	Chip_GPIO_SetPortDIR(LPC_GPIO, 0, 0xFFFFFFFF, true);
+	Chip_GPIO_SetPortDIR(LPC_GPIO, 1, 0xFFFFFFFF, true);
+	Chip_GPIO_SetPortDIR(LPC_GPIO, 2, 0xFFFFFFFF, true);
+	Chip_GPIO_SetPortDIR(LPC_GPIO, 3, 0xFFFFFFFF, true);
+	Chip_GPIO_SetPortDIR(LPC_GPIO, 4, 0xFFFFFFFF, true);
+	Chip_GPIO_SetPortOutLow(LPC_GPIO, 0, 0xFFFFFFFF);
+	Chip_GPIO_SetPortOutLow(LPC_GPIO, 1, 0xFFFFFFFF);
+	Chip_GPIO_SetPortOutLow(LPC_GPIO, 2, 0xFFFFFFFF);
+	Chip_GPIO_SetPortOutLow(LPC_GPIO, 3, 0xFFFFFFFF);
+	Chip_GPIO_SetPortOutLow(LPC_GPIO, 4, 0xFFFFFFFF);
+
+	/* Debug LED */
 	Chip_GPIO_SetPinDIROutput(LPC_GPIO, 1, 15);
-	Chip_GPIO_SetPinOutHigh(LPC_GPIO, 1, 15);
-//	Chip_GPIO_SetPinDIROutput(LPC_GPIO, 1, 20);
-//	Chip_GPIO_SetPinDIROutput(LPC_GPIO, 1, 21);
-//	Chip_GPIO_SetPinDIROutput(LPC_GPIO, 1, 23);
+	Chip_GPIO_SetPinOutLow(LPC_GPIO, 1, 15);
+
+	/* Wiznet Reset */
+	Chip_GPIO_SetPinDIROutput(LPC_GPIO, 2, 13);
+	Chip_GPIO_SetPinOutHigh(LPC_GPIO, 2, 13);
 }
 
 
@@ -216,8 +161,8 @@ int _write(int iFileHandle, char *pcBuffer, int iLength)
 	return ret;
 }
 
-void data_poll(void){
-
+void data_poll(void)
+{
 	static uint16_t addr;
 	static uint8_t code;
 	static uint16_t data;
@@ -379,13 +324,16 @@ void _delay_ms(uint16_t ms)
 	}
 }
 
+void Error_Handler(void)
+{
+}
+
 eMBErrorCode eMBRegInputCB(UCHAR * pucRegBuffer, USHORT usAddress, USHORT usNRegs)
 {
 	eMBErrorCode eStatus = MB_ENOERR;
 	int iRegIndex;
 
     // Query if it is in the register range
-    // To avoid warnings, modify to signed integer
 	if((usAddress >= REG_INPUT_START)
        && (usAddress + usNRegs <= REG_INPUT_START + REG_INPUT_NREGS)) {
 		iRegIndex = (int)(usAddress - usRegInputStart);
