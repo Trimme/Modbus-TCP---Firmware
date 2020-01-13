@@ -14,5 +14,4 @@
 #define LPC_SSP LPC_SSP1
 
 /* ------------------------ Function declarations ------------------------- */
-
 void SSP_Init(void);

@@ -54,31 +54,31 @@ uint8_t serial_data[5] = {0};
 int main(void) {
 
 	usRegInputBuf[0] = 64;
-	// Read clock settings and update SystemCoreClock variable
+	/* Read clock settings and update SystemCoreClock variable */
     SystemCoreClockUpdate();
 
-    // Initialize GPIO pins for LEDs
+    /* Initialize GPIO pins for LEDs */
     GPIO_Init();
 
-    // Initialize UART
+    /* Initialize UART
     UART_Init();
 
-    // Initialize SSP in SPI mode
+    /* Initialize SSP in SPI mode */
     SSP_Init();
 
-    // Initialize W5500
+    /* Initialize W5500 */
     W5500_Init();
     _delay_ms(3);
 
-    // Configure net
+    /* Configure Net */
     Net_Conf();
     _delay_ms(3);
 
-    // Display configuration
+    /* Display Net Configuration */
     Display_Net_Conf();
     _delay_ms(500);
 
-    // Modbus initialization
+    /* Modbus initialization */
     if (eMBTCPInit(MB_TCP_PORT_USE_DEFAULT) != MB_ENOERR) {
     	printf("ERROR: Modbus TCP initialization failed (eMBTCPInit)\r\n");
     	Error_Handler();

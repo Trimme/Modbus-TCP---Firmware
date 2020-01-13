@@ -18,7 +18,6 @@
 #include "ssp_spi.h"
 
 /* ------------------------ Function Definitions--------------------------- */
-
 void SSP_Init(void)
 {
 	/* Init Pins */

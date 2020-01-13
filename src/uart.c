@@ -10,7 +10,6 @@
 
 /* ------------------------ System Includes ------------------------------- */
 #include <stdio.h>
-#include <string.h>
 
 /* ------------------------ Project Includes ------------------------------ */
 #include "chip.h"
@@ -22,7 +21,6 @@
 static uint8_t rxbuff[UART_RRB_SIZE], txbuff[UART_SRB_SIZE];
 
 /* ------------------------ Function Definitions--------------------------- */
-
 void UART_Init(void)
 {
     /* Init Pins */
