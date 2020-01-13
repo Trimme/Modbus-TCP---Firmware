@@ -8,68 +8,46 @@
 ===============================================================================
 */
 
-/* ------------------------ System includes ------------------------------- */
+/* ------------------------ System Includes ------------------------------- */
 #include <assert.h>
 #include <cr_section_macros.h>
 #include <stdio.h>
 #include <string.h>
 
-/* ------------------------ Project includes ------------------------------ */
+/* ------------------------ Project Includes ------------------------------ */
 #include "chip.h"
+#include "main.h"
 
-/* ------------------------ Wiznet includes ------------------------------- */
+/* ------------------------ Wiznet Includes ------------------------------- */
 #include "wizchip_conf.h"
 #include "socket.h"
 #include "loopback.h"
 
-/* ------------------------ Modbus includes ------------------------------- */
+/* ------------------------ Modbus Includes ------------------------------- */
 #include "mb.h"
 #include "mbutils.h"
 
-/* ------------------------ Utilities includes ---------------------------- */
-#include "stdutils.h"
+/* ------------------------ Peripheral Includes --------------------------- */
 #include "uart.h"
 #include "ssp_spi.h"
+#include "wiznet.h"
+
 // TODO: insert other definitions and declarations here
 
 /* ------------------------ Defines --------------------------------------- */
-/* SSP */
-//#define BUFFER_SIZE (0x100)
-//#define LPC_SSP LPC_SSP1
-
-/* UART Selection */
-//#define UART_SELECTION LPC_UART2
-//#define IRQ_SELECTION UART2_IRQn
-//#define HANDLER_NAME UART2_IRQHandler
-
-/* UART Tx/Rx ring buffers */
-//STATIC RINGBUFF_T txring, rxring;
-
-/* UART Ring buffer sizes */
-//#define UART_SRB_SIZE 128
-//#define UART_RRB_SIZE 32
-
-/* UART Tx/Rx buffers */
-//static uint8_t rxbuff[UART_RRB_SIZE], txbuff[UART_SRB_SIZE];
-
-/*
-#define TICKRATE_HZ1 (1000)
-#define TICKRATE_HZ2 (1)
-volatile uint32_t msTicks;
-*/
 
 /* FreeModbus stuff */
 #define REG_DISCRETE_START    10001                // Start address of discrete inputs
-#define REG_DISCRETE_SIZE     15                    // Number of discrete inputs
+#define REG_DISCRETE_SIZE     15                   // Number of discrete inputs
 
 #define REG_COILS_START       00001                // Coil start address
-#define REG_COILS_SIZE        9                     // Number of coils
+#define REG_COILS_SIZE        9                    // Number of coils
 
 #define REG_INPUT_START       30001                // Input register start address
-#define REG_INPUT_NREGS       10                    // Number of input registers
+#define REG_INPUT_NREGS       10                   // Number of input registers
 
 #define REG_HOLDING_START     40001                // Holding register start address
-#define REG_HOLDING_NREGS     1                     // Number of holding registers
+#define REG_HOLDING_NREGS     1                    // Number of holding registers
 
 /* Discrete Inputs */
 #define DISCRETE_WARN          10001
@@ -126,36 +104,8 @@ static uint16_t usRegHoldingBuf[REG_HOLDING_NREGS];
 static uint16_t usRegInputStart = REG_INPUT_START;
 static uint16_t usRegHoldingStart = REG_HOLDING_START;
 
-/* WizNet stuff */
-wiz_NetInfo gWIZNETINFO = {.mac = {0x9b, 0x52, 0x9d, 0x41, 0xfc, 0x7c}, // MAC address
-                           .ip = {192, 168, 1, 31},                     // IP address
-                           .sn = {255, 255, 255, 0},                    // Subnet mask
-                           .dns = {8, 8, 8, 8},                         // DNS address
-                           .gw = {192, 168, 1, 1},                      // Gateway address
-                           .dhcp = NETINFO_STATIC};
-
 /* Other */
 uint8_t serial_data[5] = {0};
-
-/* Function declarations */
-void GPIO_Init(void);
-//void UART_Init(void);
-//void SSP_Init(void);
-void W5500_Init(void);
-
-void data_poll(void);
-
-void TCP_Testing(void);
-
-static void Net_Conf(void);
-static void Display_Net_Conf(void);
-void wizchip_select(void);
-void wizchip_deselect(void);
-void wizchip_write(uint8_t wb);
-uint8_t wizchip_read(void);
-
-int _write(int iFileHandle, char *pcBuffer, int iLength);
-void _delay_ms(uint16_t ms);
 
 int main(void) {
 
@@ -231,54 +181,6 @@ int main(void) {
     return 0;
 }
 
-
-void W5500_Init(void)
-{
-	//uint8_t tmp;
-	uint8_t memsize[2][8] = {{2, 2, 2, 2, 2, 2, 2, 2}, {2, 2, 2, 2, 2, 2, 2, 2}};
-
-	Chip_GPIO_SetPinState(LPC_GPIO, 0, 6, true); // SSEL
-
-
-	Chip_GPIO_SetPinState(LPC_GPIO, 2, 13, false);
-	_delay_ms(250);
-	Chip_GPIO_SetPinState(LPC_GPIO, 2, 13, true);
-	_delay_ms(750);
-
-
-	reg_wizchip_cs_cbfunc(wizchip_select, wizchip_deselect);
-	reg_wizchip_spi_cbfunc(wizchip_read, wizchip_write);
-
-
-	/* wizchip initialization */
-	if(ctlwizchip(CW_INIT_WIZCHIP, (void*) memsize) == -1){
-		printf("WIZCHIP initialization failed.");
-	}
-
-	ctlwizchip(CW_RESET_PHY, 0);
-}
-
-//void SSP_Init(void)
-//{
-//	/* Init Pins */
-//	Chip_IOCON_PinMux(LPC_IOCON, 0, 7, IOCON_MODE_INACT, IOCON_FUNC2); // SCK1
-//	Chip_IOCON_PinMux(LPC_IOCON, 0, 8, IOCON_MODE_INACT, IOCON_FUNC2); // MISO1
-//	Chip_IOCON_PinMux(LPC_IOCON, 0, 9, IOCON_MODE_INACT, IOCON_FUNC2); // MOSI1
-//
-//	Chip_IOCON_PinMux(LPC_IOCON, 0, 6, IOCON_MODE_PULLUP, IOCON_FUNC0);
-//	Chip_GPIO_SetPinDIROutput(LPC_GPIO, 0, 6); // SSEL1
-//
-//	Chip_IOCON_PinMux(LPC_IOCON, 2, 13, IOCON_MODE_PULLUP, IOCON_FUNC0);
-//	Chip_GPIO_SetPinDIROutput(LPC_GPIO, 2, 13); // N_RESET
-//
-//	/* SSP Init */
-//	Chip_SSP_Init(LPC_SSP);
-//	Chip_SSP_SetFormat(LPC_SSP, SSP_BITS_8, SSP_FRAMEFORMAT_SPI, SSP_CLOCK_MODE0);
-//	Chip_SSP_SetMaster(LPC_SSP, true);
-//	Chip_SSP_SetBitRate(LPC_SSP, 20000000);
-//	Chip_SSP_Enable(LPC_SSP);
-//}
-
 void GPIO_Init(void)
 {
     /* Init GPIO */
@@ -300,88 +202,6 @@ void GPIO_Init(void)
 //	Chip_GPIO_SetPinDIROutput(LPC_GPIO, 1, 20);
 //	Chip_GPIO_SetPinDIROutput(LPC_GPIO, 1, 21);
 //	Chip_GPIO_SetPinDIROutput(LPC_GPIO, 1, 23);
-}
-
-//void UART_Init(void)
-//{
-//    /* Init Pins */
-//    Chip_IOCON_PinMux(LPC_IOCON, 0, 10, IOCON_MODE_INACT, IOCON_FUNC1); // IOCON P0.10 TXD2 (func1), no pull
-//    Chip_IOCON_PinMux(LPC_IOCON, 0, 11, IOCON_MODE_INACT, IOCON_FUNC1); // IOCON P0.11 RXD2 (func1), no pull
-//
-//    /* UART Init */
-//    Chip_UART_Init(UART_SELECTION);
-//    Chip_UART_SetBaud(UART_SELECTION, 57600);
-//    Chip_UART_ConfigData(UART_SELECTION, (UART_LCR_WLEN8 | UART_LCR_SBS_1BIT));
-//    Chip_UART_SetupFIFOS(UART_SELECTION, (UART_FCR_FIFO_EN | UART_FCR_TRG_LEV2));
-//    Chip_UART_TXEnable(UART_SELECTION);
-//
-//    /* Init ring buffers */
-//    RingBuffer_Init(&rxring, rxbuff, 1, UART_RRB_SIZE);
-//    RingBuffer_Init(&txring, txbuff, 1, UART_SRB_SIZE);
-//
-//    /* Reset and enable FIFOs, FIFO trigger level 3 (14 chars) */
-//    Chip_UART_SetupFIFOS(UART_SELECTION, (UART_FCR_FIFO_EN | UART_FCR_RX_RS | UART_FCR_TX_RS | UART_FCR_TRG_LEV1));
-//
-//    /* Enable receive data and line status interrupt */
-//    Chip_UART_IntEnable(UART_SELECTION, (UART_IER_RBRINT | UART_IER_RLSINT));
-//
-//    /* preemption = 1, sub-priority = 1 */
-//    NVIC_SetPriority(IRQ_SELECTION, 1);
-//    NVIC_EnableIRQ(IRQ_SELECTION);
-//}
-
-static void Net_Conf(void)
-{
-	/* wizchip netconf */
-	ctlnetwork(CN_SET_NETINFO, (void*) &gWIZNETINFO);
-}
-
-static void Display_Net_Conf(void)
-{
-	uint8_t tmpstr[6] = {0,};
-	wiz_NetInfo gWIZNETINFO;
-
-	ctlnetwork(CN_GET_NETINFO, (void*) &gWIZNETINFO);
-
-	// Display Network Information
-	ctlwizchip(CW_GET_ID,(void*)tmpstr);
-
-	if (gWIZNETINFO.dhcp == NETINFO_DHCP) {
-		printf("\r\n===== %s NET CONF : DHCP =====\r\n",(char*)tmpstr);
-	}
-	else {
-		printf("\r\n===== %s NET CONF : Static =====\r\n",(char*)tmpstr);
-	}
-	printf(" MAC : %02X:%02X:%02X:%02X:%02X:%02X\r\n", gWIZNETINFO.mac[0], gWIZNETINFO.mac[1], gWIZNETINFO.mac[2], gWIZNETINFO.mac[3], gWIZNETINFO.mac[4], gWIZNETINFO.mac[5]);
-	printf(" IP : %d.%d.%d.%d\r\n", gWIZNETINFO.ip[0], gWIZNETINFO.ip[1], gWIZNETINFO.ip[2], gWIZNETINFO.ip[3]);
-	printf(" GW : %d.%d.%d.%d\r\n", gWIZNETINFO.gw[0], gWIZNETINFO.gw[1], gWIZNETINFO.gw[2], gWIZNETINFO.gw[3]);
-	printf(" SN : %d.%d.%d.%d\r\n", gWIZNETINFO.sn[0], gWIZNETINFO.sn[1], gWIZNETINFO.sn[2], gWIZNETINFO.sn[3]);
-	printf("===================================\r\n");
-}
-
-void wizchip_select(void)
-{
-	Chip_GPIO_SetPinState(LPC_GPIO, 0, 6, false); // SSEL
-}
-
-void wizchip_deselect()
-{
-	Chip_GPIO_SetPinState(LPC_GPIO, 0, 6, true); // SSEL
-}
-
-void wizchip_write(uint8_t wb)
-{
-	Chip_SSP_WriteFrames_Blocking(LPC_SSP, &wb, 1);
-
-}
-
-uint8_t wizchip_read(void)
-{
-	uint8_t rb;
-
-	Chip_SSP_ReadFrames_Blocking(LPC_SSP, &rb, 1);
-
-	return rb;
 }
 
 
@@ -681,17 +501,3 @@ eMBErrorCode eMBRegDiscreteCB(UCHAR * pucRegBuffer, USHORT usAddress, USHORT usN
 
 	return eStatus;
 }
-
-//void LinkProcessData(void)
-//{
-//	// input process data (from masters point of view)
-//	usRegInputBuf[0] = u32Heartbeat;
-//	usRegInputBuf[2] = u16ADCData;
-//	usRegInputBuf[4] = u16DataIn;
-//
-//	// output process data (from masters point of view)
-//	u16DataOut = usRegHoldingBuf[ 4];
-//	u8LedRed = usRegHoldingBuf[ 8];
-//	u8LedGreen = usRegHoldingBuf[12];
-//	u8LedBlue = usRegHoldingBuf[16];
-//}
