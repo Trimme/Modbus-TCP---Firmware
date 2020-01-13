@@ -60,44 +60,44 @@ uint8_t serial_data[5] = {0};
 int main(void) {
 
 	usRegInputBuf[0] = 64;
-	/* Read clock settings and update SystemCoreClock variable */
-    SystemCoreClockUpdate();
+    /* Read clock settings and update SystemCoreClock variable */
+	SystemCoreClockUpdate();
 
     /* Initialize GPIO pins for LEDs */
-    GPIO_Init();
+	GPIO_Init();
 
     /* Initialize UART */
-    UART_Init();
+	UART_Init();
 
     /* Initialize SSP in SPI mode */
-    SSP_Init();
+	SSP_Init();
 
     /* Initialize W5500 */
-    W5500_Init();
-    _delay_ms(3);
+	W5500_Init();
+	_delay_ms(3);
 
     /* Configure Net */
-    Net_Conf();
-    _delay_ms(3);
+	Net_Conf();
+	_delay_ms(3);
 
     /* Display Net Configuration */
-    Display_Net_Conf();
-    _delay_ms(500);
+	Display_Net_Conf();
+	_delay_ms(500);
 
     /* Modbus initialization */
-    if (eMBTCPInit(MB_TCP_PORT_USE_DEFAULT) != MB_ENOERR) {
-    	printf("ERROR: Modbus TCP initialization failed (eMBTCPInit)\r\n");
-    	Error_Handler();
+	if (eMBTCPInit(MB_TCP_PORT_USE_DEFAULT) != MB_ENOERR) {
+		printf("ERROR: Modbus TCP initialization failed (eMBTCPInit)\r\n");
+		Error_Handler();
 	};
 
-    _delay_ms(50);
+	_delay_ms(50);
 
-    if (eMBEnable() != MB_ENOERR) {
-    	printf("ERROR: Modbus TCP not enabled (eMBEnable)\r\n");
-    	Error_Handler();
+	if (eMBEnable() != MB_ENOERR) {
+		printf("ERROR: Modbus TCP not enabled (eMBEnable)\r\n");
+		Error_Handler();
 	};
 
-    while (1) {
+	while (1) {
     	modbus_tcps(2, 502);
     	data_poll();
 
@@ -122,8 +122,9 @@ int main(void) {
 
     	_delay_ms(250);
 		*/
-    }
-    return 0;
+	}
+
+	return 0;
 }
 
 void GPIO_Init(void)
@@ -143,11 +144,11 @@ void GPIO_Init(void)
 	Chip_GPIO_SetPortOutLow(LPC_GPIO, 3, 0xFFFFFFFF);
 	Chip_GPIO_SetPortOutLow(LPC_GPIO, 4, 0xFFFFFFFF);
 
-	/* Debug LED */
+    /* Debug LED */
 	Chip_GPIO_SetPinDIROutput(LPC_GPIO, 1, 15);
 	Chip_GPIO_SetPinOutLow(LPC_GPIO, 1, 15);
 
-	/* Wiznet Reset */
+    /* Wiznet Reset */
 	Chip_GPIO_SetPinDIROutput(LPC_GPIO, 2, 13);
 	Chip_GPIO_SetPinOutHigh(LPC_GPIO, 2, 13);
 }
@@ -345,10 +346,10 @@ eMBErrorCode eMBRegInputCB(UCHAR * pucRegBuffer, USHORT usAddress, USHORT usNReg
 	int iRegIndex;
 
     // Query if it is in the register range
-	if((usAddress >= REG_INPUT_START)
-       && (usAddress + usNRegs <= REG_INPUT_START + REG_INPUT_NREGS)) {
+	if ((usAddress >= REG_INPUT_START) &&
+        (usAddress + usNRegs <= REG_INPUT_START + REG_INPUT_NREGS)) {
 		iRegIndex = (int)(usAddress - usRegInputStart);
-		while(usNRegs > 0) {
+		while (usNRegs > 0) {
 			*pucRegBuffer++ = (unsigned char)(usRegInputBuf[iRegIndex] >> 8);
 			*pucRegBuffer++ = (unsigned char)(usRegInputBuf[iRegIndex] & 0xFF);
 			iRegIndex++;
@@ -368,27 +369,27 @@ eMBErrorCode eMBRegHoldingCB(UCHAR * pucRegBuffer, USHORT usAddress, USHORT usNR
 	eMBErrorCode eStatus = MB_ENOERR;
 	int iRegIndex;
 
-	if((usAddress >= REG_HOLDING_START)
-       && (usAddress + usNRegs <= REG_HOLDING_START + REG_HOLDING_NREGS)) {
+	if ((usAddress >= REG_HOLDING_START) &&
+        (usAddress + usNRegs <= REG_HOLDING_START + REG_HOLDING_NREGS)) {
 		iRegIndex = (int)(usAddress - usRegHoldingStart);
 		switch (eMode) {
-		case MB_REG_READ:
-			while(usNRegs > 0) {
-				*pucRegBuffer++ = (unsigned char)(usRegHoldingBuf[iRegIndex] >> 8);
-				*pucRegBuffer++ = (unsigned char)(usRegHoldingBuf[iRegIndex] & 0xFF);
-				iRegIndex++;
-				usNRegs--;
-			}
-			break;
+			case MB_REG_READ:
+				while(usNRegs > 0) {
+					*pucRegBuffer++ = (unsigned char)(usRegHoldingBuf[iRegIndex] >> 8);
+					*pucRegBuffer++ = (unsigned char)(usRegHoldingBuf[iRegIndex] & 0xFF);
+					iRegIndex++;
+					usNRegs--;
+				}
+				break;
 
-		case MB_REG_WRITE:
-			while(usNRegs > 0) {
-				usRegHoldingBuf[iRegIndex] = *pucRegBuffer++ << 8;
-				usRegHoldingBuf[iRegIndex] |= *pucRegBuffer++;
-				iRegIndex++;
-				usNRegs--;
-			}
-			break;
+			case MB_REG_WRITE:
+				while(usNRegs > 0) {
+					usRegHoldingBuf[iRegIndex] = *pucRegBuffer++ << 8;
+					usRegHoldingBuf[iRegIndex] |= *pucRegBuffer++;
+					iRegIndex++;
+					usNRegs--;
+				}
+				break;
 		}
 	}
 	else {
@@ -405,12 +406,12 @@ eMBErrorCode eMBRegCoilsCB(UCHAR * pucRegBuffer, USHORT usAddress, USHORT usNCoi
 	short iNCoils = (short)usNCoils;
 	unsigned short usBitOffset;
 
-	if((usAddress >= REG_COILS_START) &&
-		(usAddress + usNCoils <= REG_COILS_START + REG_COILS_SIZE)) {
+	if ((usAddress >= REG_COILS_START) &&
+        (usAddress + usNCoils <= REG_COILS_START + REG_COILS_SIZE)) {
 		usBitOffset = (unsigned short)(usAddress - REG_COILS_START);
 		switch (eMode) {
 			case MB_REG_READ:
-				while( iNCoils > 0 ) {
+				while (iNCoils > 0) {
 					*pucRegBuffer++ = xMBUtilGetBits(ucRegCoilsBuf, usBitOffset,
                                                      (unsigned char)(iNCoils > 8 ? 8 : iNCoils));
 					iNCoils -= 8;
@@ -419,7 +420,7 @@ eMBErrorCode eMBRegCoilsCB(UCHAR * pucRegBuffer, USHORT usAddress, USHORT usNCoi
 				break;
 
 			case MB_REG_WRITE:
-				while( iNCoils > 0 ) {
+				while (iNCoils > 0) {
 					xMBUtilSetBits(ucRegCoilsBuf, usBitOffset,
                                    (unsigned char)(iNCoils > 8 ? 8 : iNCoils),
                                    *pucRegBuffer++ );
@@ -428,7 +429,6 @@ eMBErrorCode eMBRegCoilsCB(UCHAR * pucRegBuffer, USHORT usAddress, USHORT usNCoi
 				}
 				break;
 		}
-
 	}
 	else {
 		eStatus = MB_ENOREG;
@@ -443,7 +443,7 @@ eMBErrorCode eMBRegDiscreteCB(UCHAR * pucRegBuffer, USHORT usAddress, USHORT usN
 	short iNDiscrete = ( short )usNDiscrete;
 	unsigned short usBitOffset;
 
-	if((usAddress >= REG_DISCRETE_START) &&
+	if ((usAddress >= REG_DISCRETE_START) &&
        (usAddress + usNDiscrete <= REG_DISCRETE_START + REG_DISCRETE_SIZE)) {
 		usBitOffset = (unsigned short)(usAddress - REG_DISCRETE_START);
 
