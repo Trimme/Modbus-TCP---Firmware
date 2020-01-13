@@ -9,7 +9,7 @@
 */
 
 /* ------------------------ System Includes ------------------------------- */
-#include <stdio.h>
+//#include <stdio.h>
 
 /* ------------------------ Project Includes ------------------------------ */
 #include "chip.h"
@@ -18,7 +18,12 @@
 /* ------------------------ Private Variables------------------------------ */
 
 /* UART Tx/Rx buffers */
-static uint8_t rxbuff[UART_RRB_SIZE], txbuff[UART_SRB_SIZE];
+static uint8_t rxbuff[UART_RRB_SIZE];
+static uint8_t txbuff[UART_SRB_SIZE];
+
+/* UART Tx/Rx Ring Buffers */
+RINGBUFF_T rxring;
+RINGBUFF_T txring;
 
 /* ------------------------ Function Definitions--------------------------- */
 void UART_Init(void)
@@ -56,3 +61,4 @@ void HANDLER_NAME(void)
 {
 	Chip_UART_IRQRBHandler(UART_SELECTION, &rxring, &txring);
 }
+

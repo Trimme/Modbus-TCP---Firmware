@@ -18,9 +18,6 @@
 #define IRQ_SELECTION UART2_IRQn
 #define HANDLER_NAME UART2_IRQHandler
 
-/* UART Tx/Rx Ring Buffers */
-STATIC RINGBUFF_T txring, rxring;
-
 /* UART Ring Buffer Sizes */
 #define UART_SRB_SIZE 128
 #define UART_RRB_SIZE 32

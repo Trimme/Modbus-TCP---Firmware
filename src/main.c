@@ -33,6 +33,12 @@
 #include "uart.h"
 #include "wiznet.h"
 
+/* ------------------------ Public Variables ------------------------------ */
+
+/* UART Tx/Rx Ring Buffers */
+extern RINGBUFF_T rxring;
+extern RINGBUFF_T txring;
+
 /* ------------------------ Private Variables ----------------------------- */
 
 /* Modbus Register Buffers */
@@ -49,7 +55,6 @@ static uint16_t usRegHoldingStart = REG_HOLDING_START;
 
 /* Data Unit for UART Demo Function */
 uint8_t serial_data[5] = {0};
-
 
 /*
 ===============================================================================
@@ -98,6 +103,7 @@ int main(void) {
 	};
 
 	while (1) {
+		printf("TEST\r\n");
     	modbus_tcps(2, 502);
     	data_poll();
 
@@ -132,13 +138,13 @@ void GPIO_Init(void)
     /* Init GPIO */
 	Chip_GPIO_Init(LPC_GPIO);
 
-    /* Set all pins as outputs in low state */
-	Chip_GPIO_SetPortDIR(LPC_GPIO, 0, 0xFFFFFFFF, true);
+    /* Set pins as outputs in low state (Except UART and SPI)*/
+	Chip_GPIO_SetPortDIR(LPC_GPIO, 0, 0xF81FFFFF, true);
 	Chip_GPIO_SetPortDIR(LPC_GPIO, 1, 0xFFFFFFFF, true);
 	Chip_GPIO_SetPortDIR(LPC_GPIO, 2, 0xFFFFFFFF, true);
 	Chip_GPIO_SetPortDIR(LPC_GPIO, 3, 0xFFFFFFFF, true);
 	Chip_GPIO_SetPortDIR(LPC_GPIO, 4, 0xFFFFFFFF, true);
-	Chip_GPIO_SetPortOutLow(LPC_GPIO, 0, 0xFFFFFFFF);
+	Chip_GPIO_SetPortOutLow(LPC_GPIO, 0, 0xF81FFFFF);
 	Chip_GPIO_SetPortOutLow(LPC_GPIO, 1, 0xFFFFFFFF);
 	Chip_GPIO_SetPortOutLow(LPC_GPIO, 2, 0xFFFFFFFF);
 	Chip_GPIO_SetPortOutLow(LPC_GPIO, 3, 0xFFFFFFFF);
@@ -154,16 +160,6 @@ void GPIO_Init(void)
 }
 
 
-int _write(int iFileHandle, char *pcBuffer, int iLength)
-{
-	_delay_ms(50);
-
-	int ret;
-
-	ret = Chip_UART_SendRB(UART_SELECTION, &txring, (const uint8_t *) pcBuffer, iLength);
-
-	return ret;
-}
 
 void data_poll(void)
 {
@@ -173,7 +169,7 @@ void data_poll(void)
 	static uint16_t idx;
 	static uint16_t bit;
 
-	Chip_UART_ReadRB(UART_SELECTION, &rxring, serial_data, 5);
+//	Chip_UART_ReadRB(UART_SELECTION, &rxring, serial_data, 5);
 
 	if(serial_data[0] != 0 || serial_data[1] != 0){
 
@@ -318,23 +314,33 @@ void data_poll(void)
 
 }
 
-
-void _delay_ms(uint16_t ms)
+int _write(int iFileHandle, char *pcBuffer, int iLength)
 {
-	for (uint16_t i = ms; i > 0; i--) {
-		for (uint32_t j = 10000; j > 0; j--);
-	}
+	_delay_ms(50);
+
+	int ret;
+
+	ret = Chip_UART_SendRB(UART_SELECTION, &txring, (const uint8_t *) pcBuffer, iLength);
+
+	return ret;
 }
 
 //void _delay_ms(uint16_t ms)
 //{
-//	uint16_t delay;
-//	volatile uint32_t i;
-//
-//	for(delay = ms; delay > 0; delay--){
-//		for(i = 10000; i > 0; i--);
+//	for (uint16_t i = ms; i > 0; i--) {
+//		for (uint32_t j = 10000; j > 0; j--);
 //	}
 //}
+
+void _delay_ms(uint16_t ms)
+{
+	uint16_t delay;
+	volatile uint32_t i;
+
+	for(delay = ms; delay > 0; delay--){
+		for(i = 10000; i > 0; i--);
+	}
+}
 
 void Error_Handler(void)
 {
