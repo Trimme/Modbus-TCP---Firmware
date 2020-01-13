@@ -8,6 +8,9 @@
 ===============================================================================
 */
 
+#ifndef _UART_H_
+#define	_UART_H_
+
 /* ------------------------ Defines --------------------------------------- */
 
 /* UART Selection */
@@ -26,3 +29,5 @@ STATIC RINGBUFF_T txring, rxring;
 
 void UART_Init(void);
 void HANDLER_NAME(void);
+
+#endif /* _UART_H_ */

@@ -8,6 +8,8 @@
 ===============================================================================
 */
 
+#ifndef _MODBUS_TCP_H_
+#define	_MODBUS_TCP_H_
 
 /* ------------------------ Defines --------------------------------------- */
 #define REG_DISCRETE_START    10001         // Start address of discrete inputs
@@ -64,3 +66,5 @@
 
 /* Holding Registers */
 #define HOLD_SETPOINT          40001
+
+#endif /* _MODBUS_TCP_H_ */

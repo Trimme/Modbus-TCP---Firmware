@@ -444,7 +444,7 @@ eMBErrorCode eMBRegDiscreteCB(UCHAR * pucRegBuffer, USHORT usAddress, USHORT usN
 	unsigned short usBitOffset;
 
 	if ((usAddress >= REG_DISCRETE_START) &&
-       (usAddress + usNDiscrete <= REG_DISCRETE_START + REG_DISCRETE_SIZE)) {
+        (usAddress + usNDiscrete <= REG_DISCRETE_START + REG_DISCRETE_SIZE)) {
 		usBitOffset = (unsigned short)(usAddress - REG_DISCRETE_START);
 
 		while(iNDiscrete > 0) {
