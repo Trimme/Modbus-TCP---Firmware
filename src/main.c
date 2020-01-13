@@ -28,27 +28,29 @@
 
 /* ------------------------ Utilities includes ---------------------------- */
 #include "stdutils.h"
+#include "uart.h"
+#include "ssp_spi.h"
 // TODO: insert other definitions and declarations here
 
-/* ------------------------ Defines ----------------------------- */
+/* ------------------------ Defines --------------------------------------- */
 /* SSP */
-#define BUFFER_SIZE (0x100)
-#define LPC_SSP LPC_SSP1
+//#define BUFFER_SIZE (0x100)
+//#define LPC_SSP LPC_SSP1
 
 /* UART Selection */
-#define UART_SELECTION LPC_UART2
-#define IRQ_SELECTION UART2_IRQn
-#define HANDLER_NAME UART2_IRQHandler
+//#define UART_SELECTION LPC_UART2
+//#define IRQ_SELECTION UART2_IRQn
+//#define HANDLER_NAME UART2_IRQHandler
 
 /* UART Tx/Rx ring buffers */
-STATIC RINGBUFF_T txring, rxring;
+//STATIC RINGBUFF_T txring, rxring;
 
 /* UART Ring buffer sizes */
-#define UART_SRB_SIZE 128
-#define UART_RRB_SIZE 32
+//#define UART_SRB_SIZE 128
+//#define UART_RRB_SIZE 32
 
 /* UART Tx/Rx buffers */
-static uint8_t rxbuff[UART_RRB_SIZE], txbuff[UART_SRB_SIZE];
+//static uint8_t rxbuff[UART_RRB_SIZE], txbuff[UART_SRB_SIZE];
 
 /*
 #define TICKRATE_HZ1 (1000)
@@ -137,8 +139,8 @@ uint8_t serial_data[5] = {0};
 
 /* Function declarations */
 void GPIO_Init(void);
-void UART_Init(void);
-void SSP_Init(void);
+//void UART_Init(void);
+//void SSP_Init(void);
 void W5500_Init(void);
 
 void data_poll(void);
@@ -154,7 +156,6 @@ uint8_t wizchip_read(void);
 
 int _write(int iFileHandle, char *pcBuffer, int iLength);
 void _delay_ms(uint16_t ms);
-void HANDLER_NAME(void);
 
 int main(void) {
 
@@ -257,26 +258,26 @@ void W5500_Init(void)
 	ctlwizchip(CW_RESET_PHY, 0);
 }
 
-void SSP_Init(void)
-{
-	/* Init Pins */
-	Chip_IOCON_PinMux(LPC_IOCON, 0, 7, IOCON_MODE_INACT, IOCON_FUNC2); // SCK1
-	Chip_IOCON_PinMux(LPC_IOCON, 0, 8, IOCON_MODE_INACT, IOCON_FUNC2); // MISO1
-	Chip_IOCON_PinMux(LPC_IOCON, 0, 9, IOCON_MODE_INACT, IOCON_FUNC2); // MOSI1
-
-	Chip_IOCON_PinMux(LPC_IOCON, 0, 6, IOCON_MODE_PULLUP, IOCON_FUNC0);
-	Chip_GPIO_SetPinDIROutput(LPC_GPIO, 0, 6); // SSEL1
-
-	Chip_IOCON_PinMux(LPC_IOCON, 2, 13, IOCON_MODE_PULLUP, IOCON_FUNC0);
-	Chip_GPIO_SetPinDIROutput(LPC_GPIO, 2, 13); // N_RESET
-
-	/* SSP Init */
-	Chip_SSP_Init(LPC_SSP);
-	Chip_SSP_SetFormat(LPC_SSP, SSP_BITS_8, SSP_FRAMEFORMAT_SPI, SSP_CLOCK_MODE0);
-	Chip_SSP_SetMaster(LPC_SSP, true);
-	Chip_SSP_SetBitRate(LPC_SSP, 20000000);
-	Chip_SSP_Enable(LPC_SSP);
-}
+//void SSP_Init(void)
+//{
+//	/* Init Pins */
+//	Chip_IOCON_PinMux(LPC_IOCON, 0, 7, IOCON_MODE_INACT, IOCON_FUNC2); // SCK1
+//	Chip_IOCON_PinMux(LPC_IOCON, 0, 8, IOCON_MODE_INACT, IOCON_FUNC2); // MISO1
+//	Chip_IOCON_PinMux(LPC_IOCON, 0, 9, IOCON_MODE_INACT, IOCON_FUNC2); // MOSI1
+//
+//	Chip_IOCON_PinMux(LPC_IOCON, 0, 6, IOCON_MODE_PULLUP, IOCON_FUNC0);
+//	Chip_GPIO_SetPinDIROutput(LPC_GPIO, 0, 6); // SSEL1
+//
+//	Chip_IOCON_PinMux(LPC_IOCON, 2, 13, IOCON_MODE_PULLUP, IOCON_FUNC0);
+//	Chip_GPIO_SetPinDIROutput(LPC_GPIO, 2, 13); // N_RESET
+//
+//	/* SSP Init */
+//	Chip_SSP_Init(LPC_SSP);
+//	Chip_SSP_SetFormat(LPC_SSP, SSP_BITS_8, SSP_FRAMEFORMAT_SPI, SSP_CLOCK_MODE0);
+//	Chip_SSP_SetMaster(LPC_SSP, true);
+//	Chip_SSP_SetBitRate(LPC_SSP, 20000000);
+//	Chip_SSP_Enable(LPC_SSP);
+//}
 
 void GPIO_Init(void)
 {
@@ -301,33 +302,33 @@ void GPIO_Init(void)
 //	Chip_GPIO_SetPinDIROutput(LPC_GPIO, 1, 23);
 }
 
-void UART_Init(void)
-{
-    /* Init Pins */
-    Chip_IOCON_PinMux(LPC_IOCON, 0, 10, IOCON_MODE_INACT, IOCON_FUNC1); // IOCON P0.10 TXD2 (func1), no pull
-    Chip_IOCON_PinMux(LPC_IOCON, 0, 11, IOCON_MODE_INACT, IOCON_FUNC1); // IOCON P0.11 RXD2 (func1), no pull
-
-    /* UART Init */
-    Chip_UART_Init(UART_SELECTION);
-    Chip_UART_SetBaud(UART_SELECTION, 57600);
-    Chip_UART_ConfigData(UART_SELECTION, (UART_LCR_WLEN8 | UART_LCR_SBS_1BIT));
-    Chip_UART_SetupFIFOS(UART_SELECTION, (UART_FCR_FIFO_EN | UART_FCR_TRG_LEV2));
-    Chip_UART_TXEnable(UART_SELECTION);
-
-    /* Init ring buffers */
-    RingBuffer_Init(&rxring, rxbuff, 1, UART_RRB_SIZE);
-    RingBuffer_Init(&txring, txbuff, 1, UART_SRB_SIZE);
-
-    /* Reset and enable FIFOs, FIFO trigger level 3 (14 chars) */
-    Chip_UART_SetupFIFOS(UART_SELECTION, (UART_FCR_FIFO_EN | UART_FCR_RX_RS | UART_FCR_TX_RS | UART_FCR_TRG_LEV1));
-
-    /* Enable receive data and line status interrupt */
-    Chip_UART_IntEnable(UART_SELECTION, (UART_IER_RBRINT | UART_IER_RLSINT));
-
-    /* preemption = 1, sub-priority = 1 */
-    NVIC_SetPriority(IRQ_SELECTION, 1);
-    NVIC_EnableIRQ(IRQ_SELECTION);
-}
+//void UART_Init(void)
+//{
+//    /* Init Pins */
+//    Chip_IOCON_PinMux(LPC_IOCON, 0, 10, IOCON_MODE_INACT, IOCON_FUNC1); // IOCON P0.10 TXD2 (func1), no pull
+//    Chip_IOCON_PinMux(LPC_IOCON, 0, 11, IOCON_MODE_INACT, IOCON_FUNC1); // IOCON P0.11 RXD2 (func1), no pull
+//
+//    /* UART Init */
+//    Chip_UART_Init(UART_SELECTION);
+//    Chip_UART_SetBaud(UART_SELECTION, 57600);
+//    Chip_UART_ConfigData(UART_SELECTION, (UART_LCR_WLEN8 | UART_LCR_SBS_1BIT));
+//    Chip_UART_SetupFIFOS(UART_SELECTION, (UART_FCR_FIFO_EN | UART_FCR_TRG_LEV2));
+//    Chip_UART_TXEnable(UART_SELECTION);
+//
+//    /* Init ring buffers */
+//    RingBuffer_Init(&rxring, rxbuff, 1, UART_RRB_SIZE);
+//    RingBuffer_Init(&txring, txbuff, 1, UART_SRB_SIZE);
+//
+//    /* Reset and enable FIFOs, FIFO trigger level 3 (14 chars) */
+//    Chip_UART_SetupFIFOS(UART_SELECTION, (UART_FCR_FIFO_EN | UART_FCR_RX_RS | UART_FCR_TX_RS | UART_FCR_TRG_LEV1));
+//
+//    /* Enable receive data and line status interrupt */
+//    Chip_UART_IntEnable(UART_SELECTION, (UART_IER_RBRINT | UART_IER_RLSINT));
+//
+//    /* preemption = 1, sub-priority = 1 */
+//    NVIC_SetPriority(IRQ_SELECTION, 1);
+//    NVIC_EnableIRQ(IRQ_SELECTION);
+//}
 
 static void Net_Conf(void)
 {
@@ -383,10 +384,6 @@ uint8_t wizchip_read(void)
 	return rb;
 }
 
-void HANDLER_NAME(void)
-{
-	Chip_UART_IRQRBHandler(UART_SELECTION, &rxring, &txring);
-}
 
 int _write(int iFileHandle, char *pcBuffer, int iLength)
 {
