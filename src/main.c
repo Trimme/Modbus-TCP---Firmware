@@ -79,23 +79,19 @@ int main(void) {
 
     /* Initialize W5500 */
 	W5500_Init();
-	_delay_ms(3);
 
     /* Configure Net */
 	Net_Conf();
-	_delay_ms(3);
 
     /* Display Net Configuration */
 	Display_Net_Conf();
-	_delay_ms(500);
+//	_delay_ms(500);
 
     /* Modbus initialization */
 	if (eMBTCPInit(MB_TCP_PORT_USE_DEFAULT) != MB_ENOERR) {
 		printf("ERROR: Modbus TCP initialization failed (eMBTCPInit)\r\n");
 		Error_Handler();
 	};
-
-	_delay_ms(50);
 
 	if (eMBEnable() != MB_ENOERR) {
 		printf("ERROR: Modbus TCP not enabled (eMBEnable)\r\n");
@@ -107,27 +103,6 @@ int main(void) {
     	modbus_tcps(2, 502);
     	data_poll();
 
-    	/*
-    	Chip_GPIO_SetPinState(LPC_GPIO, 1, 18, true);
-    	Chip_GPIO_SetPinState(LPC_GPIO, 1, 23, false);
-
-    	_delay_ms(250);
-
-    	Chip_GPIO_SetPinState(LPC_GPIO, 1, 20, true);
-    	Chip_GPIO_SetPinState(LPC_GPIO, 1, 18, false);
-
-    	_delay_ms(250);
-
-    	Chip_GPIO_SetPinState(LPC_GPIO, 1, 21, true);
-    	Chip_GPIO_SetPinState(LPC_GPIO, 1, 20, false);
-
-    	_delay_ms(250);
-
-    	Chip_GPIO_SetPinState(LPC_GPIO, 1, 23, true);
-    	Chip_GPIO_SetPinState(LPC_GPIO, 1, 21, false);
-
-    	_delay_ms(250);
-		*/
 	}
 
 	return 0;
@@ -157,6 +132,10 @@ void GPIO_Init(void)
     /* Wiznet Reset */
 	Chip_GPIO_SetPinDIROutput(LPC_GPIO, 2, 13);
 	Chip_GPIO_SetPinOutHigh(LPC_GPIO, 2, 13);
+
+	/* Clock Out Enable */
+//	Chip_IOCON_PinMux(LPC_IOCON, 1, 27, IOCON_MODE_INACT, IOCON_FUNC1); // CLKOUT
+//	Chip_Clock_EnableCLKOUT();
 }
 
 
@@ -316,31 +295,30 @@ void data_poll(void)
 
 int _write(int iFileHandle, char *pcBuffer, int iLength)
 {
-	_delay_ms(50);
-
 	int ret;
 
 	ret = Chip_UART_SendRB(UART_SELECTION, &txring, (const uint8_t *) pcBuffer, iLength);
+	_delay_ms(50);
 
 	return ret;
 }
 
-//void _delay_ms(uint16_t ms)
-//{
-//	for (uint16_t i = ms; i > 0; i--) {
-//		for (uint32_t j = 10000; j > 0; j--);
-//	}
-//}
-
 void _delay_ms(uint16_t ms)
 {
-	uint16_t delay;
-	volatile uint32_t i;
-
-	for(delay = ms; delay > 0; delay--){
-		for(i = 10000; i > 0; i--);
+	for (uint16_t i = ms; i > 0; i--) {
+		for (volatile uint32_t j = 11875; j > 0; j--);
 	}
 }
+
+//void _delay_ms(uint16_t ms)
+//{
+//	uint16_t delay;
+//	volatile uint32_t i;
+//
+//	for(delay = ms; delay > 0; delay--){
+//		for(i = 10000; i > 0; i--);
+//	}
+//}
 
 void Error_Handler(void)
 {

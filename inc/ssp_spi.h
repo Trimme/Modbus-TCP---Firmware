@@ -13,10 +13,9 @@
 
 /* ------------------------ Defines --------------------------------------- */
 
-#define BUFFER_SIZE (0x100)
 #define LPC_SSP LPC_SSP1
 
-/* ------------------------ Function declarations ------------------------- */
+/* ------------------------ Function Declarations ------------------------- */
 void SSP_Init(void);
 
 #endif /* _SSP_SPI_H_ */

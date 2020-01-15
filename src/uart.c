@@ -15,17 +15,19 @@
 #include "chip.h"
 #include "uart.h"
 
-/* ------------------------ Private Variables------------------------------ */
-
-/* UART Tx/Rx buffers */
-static uint8_t rxbuff[UART_RRB_SIZE];
-static uint8_t txbuff[UART_SRB_SIZE];
+/* ------------------------ Public Variables ------------------------------ */
 
 /* UART Tx/Rx Ring Buffers */
 RINGBUFF_T rxring;
 RINGBUFF_T txring;
 
-/* ------------------------ Function Definitions--------------------------- */
+/* ------------------------ Private Variables ----------------------------- */
+
+/* UART Tx/Rx buffers */
+static uint8_t rxbuff[UART_RRB_SIZE];
+static uint8_t txbuff[UART_SRB_SIZE];
+
+/* ------------------------ Function Definitions -------------------------- */
 void UART_Init(void)
 {
     /* Init Pins */
