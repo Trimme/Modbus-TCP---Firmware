@@ -103,7 +103,7 @@ int main(void) {
 	};
 
 	while (1) {
-		printf("TEST\r\n");
+
     	modbus_tcps(2, 502);
     	data_poll();
 
@@ -169,7 +169,7 @@ void data_poll(void)
 	static uint16_t idx;
 	static uint16_t bit;
 
-//	Chip_UART_ReadRB(UART_SELECTION, &rxring, serial_data, 5);
+	Chip_UART_ReadRB(UART_SELECTION, &rxring, serial_data, 5);
 
 	if(serial_data[0] != 0 || serial_data[1] != 0){
 
