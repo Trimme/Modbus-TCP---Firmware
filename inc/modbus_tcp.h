@@ -67,4 +67,16 @@
 /* Holding Registers */
 #define HOLD_SETPOINT          40001
 
+/* ------------------------ Public Variables ------------------------------ */
+
+/* Modbus Register Buffers */
+extern uint8_t ucRegDiscreteBuf[(REG_DISCRETE_SIZE + 7) / 8];
+extern uint8_t ucRegCoilsBuf[(REG_COILS_SIZE + 7) / 8];
+extern uint16_t usRegInputBuf[REG_INPUT_NREGS];
+extern uint16_t usRegHoldingBuf[REG_HOLDING_NREGS];
+
+/* Modbus Register Start Addresses */
+extern uint16_t usRegInputStart;
+extern uint16_t usRegHoldingStart;
+
 #endif /* _MODBUS_TCP_H_ */

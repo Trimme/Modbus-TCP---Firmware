@@ -36,24 +36,21 @@ wiz_NetInfo gWIZNETINFO = {.mac = {0x9b, 0x52, 0x9d, 0x41, 0xfc, 0x7c}, // MAC a
 /* ------------------------ Function Definitions--------------------------- */
 void W5500_Init(void)
 {
-	//uint8_t tmp;
 	uint8_t memsize[2][8] = {{2, 2, 2, 2, 2, 2, 2, 2}, {2, 2, 2, 2, 2, 2, 2, 2}};
 
 	Chip_GPIO_SetPinState(LPC_GPIO, 0, 6, true); // SSEL
-
 
 	Chip_GPIO_SetPinState(LPC_GPIO, 2, 13, false);
 	_delay_ms(250);
 	Chip_GPIO_SetPinState(LPC_GPIO, 2, 13, true);
 	_delay_ms(750);
 
-
 	reg_wizchip_cs_cbfunc(wizchip_select, wizchip_deselect);
 	reg_wizchip_spi_cbfunc(wizchip_read, wizchip_write);
 
 
-	/* wizchip initialization */
-	if(ctlwizchip(CW_INIT_WIZCHIP, (void*) memsize) == -1){
+	/* Wizchip Initialization */
+	if (ctlwizchip(CW_INIT_WIZCHIP, (void*) memsize) == -1) {
 		printf("WIZCHIP initialization failed.");
 	}
 
@@ -78,7 +75,7 @@ void wizchip_write(uint8_t wb)
 
 uint8_t wizchip_read(void)
 {
-	uint8_t rb;
+	uint8_t rb = 0;
 
 	Chip_SSP_ReadFrames_Blocking(LPC_SSP, &rb, 1);
 

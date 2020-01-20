@@ -12,11 +12,11 @@
 #define	_MAIN_H_
 
 /* ------------------------ Function Declarations ------------------------- */
-void GPIO_Init(void);
-void _delay_ms(uint16_t ms);
-int _write(int iFileHandle, char *pcBuffer, int iLength);
-void data_poll(void);
-void Error_Handler(void);
 int main(void);
+void GPIO_Init(void);
+void data_poll(void);
+int _write(int iFileHandle, char *pcBuffer, int iLength);
+void _delay_ms(uint16_t ms);
+void Error_Handler(void);
 
 #endif /* _MAIN_H_ */

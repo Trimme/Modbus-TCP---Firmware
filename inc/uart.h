@@ -22,8 +22,13 @@
 #define UART_SRB_SIZE 128
 #define UART_RRB_SIZE 32
 
-/* ------------------------ Function declarations ------------------------- */
+/* ------------------------ Public Variables ------------------------------ */
 
+/* UART Tx/Rx Ring Buffers */
+extern RINGBUFF_T rxring;
+extern RINGBUFF_T txring;
+
+/* ------------------------ Function declarations ------------------------- */
 void UART_Init(void);
 void HANDLER_NAME(void);
 

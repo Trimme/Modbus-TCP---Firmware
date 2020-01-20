@@ -15,12 +15,6 @@
 #include "chip.h"
 #include "uart.h"
 
-/* ------------------------ Public Variables ------------------------------ */
-
-/* UART Tx/Rx Ring Buffers */
-RINGBUFF_T rxring;
-RINGBUFF_T txring;
-
 /* ------------------------ Private Variables ----------------------------- */
 
 /* UART Tx/Rx buffers */
