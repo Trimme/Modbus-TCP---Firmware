@@ -22,7 +22,7 @@
 #define REG_INPUT_NREGS       10            // Number of input registers
 
 #define REG_HOLDING_START     40001         // Holding register start address
-#define REG_HOLDING_NREGS     1             // Number of holding registers
+#define REG_HOLDING_NREGS     100             // Number of holding registers
 
 /* Coils */
 #define COIL_START             00001

@@ -1,10 +1,18 @@
 /*
 ===============================================================================
- Name        : Modbus_TCP-Firmware.c
- Author      : $(author)
- Version     :
+ Name        : Modbus_TCP-Firmware
+ Author      : Simon Liljelind (s.liljelind@gmail.com)
+               David Skånehult (david.skanehult@gmail.com)
+
+ Version     : 1.0
  Copyright   : $(copyright)
- Description : Modbus TCP Implementation for NXP LPC176xx and Wiznet W5500
+ Description : Modbus TCP Implementation for NXP LPC176xx and Wiznet W5500.
+
+               Uses the following libraries:
+               NXP LPCOpen              http://www.nxp.com
+               FreeMODBUS               https://github.com/cwalter-at/freemodbus
+               Wiznet ioLibrary Driver  https://github.com/Wiznet/ioLibrary_Driver
+
 ===============================================================================
 */
 
@@ -98,7 +106,7 @@ int main(void) {
 	while (1) {
 
 		modbus_tcps(2, 502);
-		data_poll();
+//		data_poll();
 
 	}
 
@@ -245,7 +253,7 @@ void data_poll(void)
 		}
 	}
 
-	_delay_ms(100);
+//	_delay_ms(100);
 
 	serial_data[0] = 0;
 	serial_data[1] = 0;

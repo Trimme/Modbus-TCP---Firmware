@@ -405,10 +405,10 @@ int32_t recv(uint8_t sn, uint8_t * buf, uint16_t len)
    {
 #endif
 //
-//      while(1)
+      while(1)
 	  /* extra */
-	  int i = 1;
-	  while(i <= 10000)
+//	  int i = 1;
+//	  while(i <= 10000)
       {
          recvsize = getSn_RX_RSR(sn);
          tmp = getSn_SR(sn);
@@ -432,12 +432,12 @@ int32_t recv(uint8_t sn, uint8_t * buf, uint16_t len)
          if((sock_io_mode & (1<<sn)) && (recvsize == 0)) return SOCK_BUSY;
          if(recvsize != 0) break;
          /* extra */
-         i++;
+//         i++;
       };
 	  /* extra */
-	  if(i >= 5000){
-		  return 0;
-	  }
+//	  if(i >= 5000){
+//		  return 0;
+//	  }
 #if _WIZCHIP_ == 5300
    }
 #endif
